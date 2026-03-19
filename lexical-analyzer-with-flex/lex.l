@@ -6,7 +6,7 @@
 
 %%
 
-[ \t]+              { /* ignora espaços em branco */ }
+[ \t\r\n]+           { /* ignora espaços em branco */ }
 
 "if"                { printf("PALAVRA-CHAVE: %s\n", yytext); }
 "else"              { printf("PALAVRA-CHAVE: %s\n", yytext); }
@@ -24,8 +24,6 @@
 
 "("                 { printf("PARENTESE: %s\n", yytext); }
 ")"                 { printf("PARENTESE: %s\n", yytext); }
-
-\n                  { /* ignora novas linhas, ou imprima para debug */ }
 
 .                   { printf("ERRO LEXICO: %s\n", yytext); }
 

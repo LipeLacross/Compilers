@@ -1,6 +1,6 @@
 /*
- * Analisador Sintático (Parser) - Bison
- * Projeto Compilador Pascal
+ * Compilador Pascal Completo
+ * Projeto 1 VA
  * Professor: Waldemar Pires Ferreira Neto
  */
 
@@ -10,15 +10,15 @@
 #include <string.h>
 #include "symbol_table.h"
 
-extern int yylex(void);
-extern int yyparse(void);
+int yylex(void);
+int yyparse(void);
+void yyerror(const char *s);
 extern FILE *yyin;
 
-void yyerror(const char *s);
-
-SymbolTable *global_table;
-SymbolType current_type;
-int current_line;
+SymbolTable *sym_table;
+int current_line = 1;
+int yylex(void);
+int yyparse(void);
 %}
 
 %union {
@@ -26,21 +26,18 @@ int current_line;
     double realval;
     char string[64];
     SymbolType type;
-    struct {
-        SymbolType type;
-        int is_const;
-    } expr_type;
 }
 
-/* Tokens do Lexicográfico */
-%token PROGRAM VAR INTEGER REAL PROCEDURE BEGIN END IF THEN ELSE WHILE DO
-%token OR AND NOT DIV MOD
 %token <string> ID
 %token <intval> NUM_INT
 %token <realval> NUM_REAL
+%token PROGRAM VAR INTEGER REAL PROCEDURE BEGIN END IF THEN ELSE WHILE DO
+%token OR AND NOT DIV MOD
 %token <string> RELOP ADDOP MULOP ASSIGNOP DOT COLON SEMICOLON COMMA LPAREN RPAREN
 
-/* Precedence */
+%type <type> Type
+
+%right ASSIGNOP
 %left OR
 %left AND
 %left RELOP
@@ -49,208 +46,97 @@ int current_line;
 %left NOT
 %left UMINUS
 
-/* Non-terminals types */
-%type <type> Type
-%type <expr_type> Expression SimpleExpression Term Factor
-%type <string> id
+%start Program
 
 %%
 
 Program:
-    Header Declarations Block DOT
+    Header Block DOT
     {
-        printf("Programa válido!\n");
-        print_table(global_table);
+        printf("\n=== Compilacao OK ===\n");
+        print_table(sym_table);
     }
 ;
 
 Header:
     PROGRAM ID SEMICOLON
     {
-        insert_symbol(global_table, $2, TYPE_PROCEDURE, KIND_PROCEDURE, current_line);
+        insert_symbol(sym_table, $2, TYPE_PROCEDURE, KIND_PROCEDURE, current_line);
     }
+|   PROGRAM ID SEMICOLON VAR Vars
+|   PROGRAM ID SEMICOLON VAR Vars PROCEDURE ID SEMICOLON Block
+|   PROGRAM ID SEMICOLON PROCEDURE ID SEMICOLON Block
 ;
 
-Declarations:
-    VariableDeclarationSection ProcedureDeclarations
-    | ProcedureDeclarations
-    | /* ε */
-;
-
-VariableDeclarationSection:
-    VAR VariableDeclarations
-;
-
-VariableDeclarations:
-    VariableDeclaration
-    | VariableDeclarations VariableDeclaration
-;
-
-VariableDeclaration:
-    IdentifierList COLON Type SEMICOLON
+Vars:
+    ID COLON Type SEMICOLON
     {
-        current_type = $3;
+        insert_symbol(sym_table, $1, $3, KIND_VARIABLE, current_line);
     }
-;
-
-IdentifierList:
-    ID
+|   Vars ID COLON Type SEMICOLON
     {
-        insert_symbol(global_table, $1, current_type, KIND_VARIABLE, current_line);
-    }
-    | IdentifierList COMMA ID
-    {
-        insert_symbol(global_table, $3, current_type, KIND_VARIABLE, current_line);
+        insert_symbol(sym_table, $2, $4, KIND_VARIABLE, current_line);
     }
 ;
 
 Type:
     INTEGER { $$ = TYPE_INTEGER; }
-    | REAL { $$ = TYPE_REAL; }
-;
-
-ProcedureDeclarations:
-    ProcedureDeclaration
-    | ProcedureDeclarations ProcedureDeclaration
-    | /* ε */
-;
-
-ProcedureDeclaration:
-    ProcedureHeader Declarations Block SEMICOLON
-;
-
-ProcedureHeader:
-    PROCEDURE ID SEMICOLON
-    {
-        insert_symbol(global_table, $2, TYPE_PROCEDURE, KIND_PROCEDURE, current_line);
-        enter_scope(global_table);
-    }
+|   REAL { $$ = TYPE_REAL; }
 ;
 
 Block:
-    BEGIN Statements END
-    {
-        exit_scope(global_table);
-    }
+    BEGIN END
+|   BEGIN Stmts END
 ;
 
-Statements:
-    Statement
-    | Statements SEMICOLON Statement
+Stmts:
+    Stmt
+|   Stmts SEMICOLON Stmt
 ;
 
-Statement:
-    ID ASSIGNOP Expression
+Stmt:
+    ID ASSIGNOP Expr
     {
-        Symbol *s = lookup_symbol(global_table, $1);
-        if (!s) {
-            fprintf(stderr, "Erro: variável '%s' não declarada na linha %d\n", $1, current_line);
-        }
+        if (!lookup_symbol(sym_table, $1))
+            fprintf(stderr, "Aviso: '%s' nao declarado\n", $1);
     }
-    | ID LPAREN RPAREN
-    {
-        Symbol *s = lookup_symbol(global_table, $1);
-        if (!s) {
-            fprintf(stderr, "Erro: procedimento '%s' não declarado na linha %d\n", $1, current_line);
-        } else if (s->type != TYPE_PROCEDURE) {
-            fprintf(stderr, "Erro: '%s' não é procedimento na linha %d\n", $1, current_line);
-        }
-    }
-    | Block
-    | IF Expression THEN Statement ElseClause
-    | WHILE Expression DO Statement
-    | /* ε */
+|   ID LPAREN RPAREN
+|   IF Expr THEN Stmt
+|   IF Expr THEN Stmt ELSE Stmt
+|   WHILE Expr DO Stmt
+|   Block
 ;
 
-ElseClause:
-    ELSE Statement
-    | /* ε */
-;
-
-Expression:
-    SimpleExpression
-    {
-        $$ = $1;
-    }
-    | SimpleExpression RELOP SimpleExpression
-    {
-        $$.type = TYPE_BOOLEAN;
-        $$.is_const = 0;
-    }
-;
-
-SimpleExpression:
-    Term
-    {
-        $$ = $1;
-    }
-    | ADDOP Term
-    {
-        $$ = $2;
-    }
-    | SimpleExpression ADDOP Term
-    {
-        /* Inferred type from operands */
-    }
-;
-
-Term:
-    Factor
-    {
-        $$ = $1;
-    }
-    | Term MULOP Factor
-    {
-        /* Type checking for multiplication */
-    }
-    | Term DIV Factor
-    {
-        $$.type = TYPE_INTEGER;
-    }
-    | Term MOD Factor
-    {
-        $$.type = TYPE_INTEGER;
-    }
-    | Term AND Factor
-    {
-        $$.type = TYPE_BOOLEAN;
-    }
-;
-
-Factor:
-    ID
-    {
-        Symbol *s = lookup_symbol(global_table, $1);
-        if (s) {
-            $$.type = s->type;
-        } else {
-            $$.type = TYPE_UNKNOWN;
-        }
-        $$.is_const = 0;
-    }
-    | NUM_INT
-    {
-        $$.type = TYPE_INTEGER;
-        $$.is_const = 1;
-    }
-    | NUM_REAL
-    {
-        $$.type = TYPE_REAL;
-        $$.is_const = 1;
-    }
-    | LPAREN Expression RPAREN
-    {
-        $$ = $2;
-    }
-    | NOT Factor
-    {
-        $$.type = TYPE_BOOLEAN;
-        $$.is_const = $2.is_const;
-    }
+Expr:
+    Expr RELOP Expr
+|   Expr ADDOP Expr
+|   Expr MULOP Expr
+|   Expr DIV Expr
+|   Expr MOD Expr
+|   Expr AND Expr
+|   NOT Expr
+|   ID
+|   NUM_INT
+|   NUM_REAL
+|   LPAREN Expr RPAREN
 ;
 
 %%
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Erro sintático: %s\n", s);
+    fprintf(stderr, "Erro: %s\n", s);
 }
+
+int main(int argc, char *argv[]) {
+    sym_table = create_table();
+    if (argc > 1) {
+        yyin = fopen(argv[1], "r");
+        if (!yyin) { fprintf(stderr, "Erro: %s\n", argv[1]); return 1; }
+    }
+    printf("=== Compilador Pascal ===\n");
+    yyparse();
+    free_table(sym_table);
+    return 0;
+}
+
+int yywrap(void) { return 1; }

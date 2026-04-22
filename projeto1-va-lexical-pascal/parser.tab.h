@@ -54,26 +54,26 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    PROGRAM = 258,                 /* PROGRAM  */
-    VAR = 259,                     /* VAR  */
-    INTEGER = 260,                 /* INTEGER  */
-    REAL = 261,                    /* REAL  */
-    PROCEDURE = 262,               /* PROCEDURE  */
-    BEGIN = 263,                   /* BEGIN  */
-    END = 264,                     /* END  */
-    IF = 265,                      /* IF  */
-    THEN = 266,                    /* THEN  */
-    ELSE = 267,                    /* ELSE  */
-    WHILE = 268,                   /* WHILE  */
-    DO = 269,                      /* DO  */
-    OR = 270,                      /* OR  */
-    AND = 271,                     /* AND  */
-    NOT = 272,                     /* NOT  */
-    DIV = 273,                     /* DIV  */
-    MOD = 274,                     /* MOD  */
-    ID = 275,                      /* ID  */
-    NUM_INT = 276,                 /* NUM_INT  */
-    NUM_REAL = 277,                /* NUM_REAL  */
+    ID = 258,                      /* ID  */
+    NUM_INT = 259,                 /* NUM_INT  */
+    NUM_REAL = 260,                /* NUM_REAL  */
+    PROGRAM = 261,                 /* PROGRAM  */
+    VAR = 262,                     /* VAR  */
+    INTEGER = 263,                 /* INTEGER  */
+    REAL = 264,                    /* REAL  */
+    PROCEDURE = 265,               /* PROCEDURE  */
+    BEGIN = 266,                   /* BEGIN  */
+    END = 267,                     /* END  */
+    IF = 268,                      /* IF  */
+    THEN = 269,                    /* THEN  */
+    ELSE = 270,                    /* ELSE  */
+    WHILE = 271,                   /* WHILE  */
+    DO = 272,                      /* DO  */
+    OR = 273,                      /* OR  */
+    AND = 274,                     /* AND  */
+    NOT = 275,                     /* NOT  */
+    DIV = 276,                     /* DIV  */
+    MOD = 277,                     /* MOD  */
     RELOP = 278,                   /* RELOP  */
     ADDOP = 279,                   /* ADDOP  */
     MULOP = 280,                   /* MULOP  */
@@ -93,18 +93,14 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 25 "parser.y"
+#line 22 "parser.y"
 
     int intval;
     double realval;
     char string[64];
     SymbolType type;
-    struct {
-        SymbolType type;
-        int is_const;
-    } expr_type;
 
-#line 108 "parser.tab.h"
+#line 104 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

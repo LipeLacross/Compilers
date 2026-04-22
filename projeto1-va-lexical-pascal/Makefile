@@ -1,44 +1,42 @@
 # Makefile - Compilador Pascal
-# Professor: Waldemar Pires Ferreira Neto
+# Projeto 1 VA
 
 CC = gcc
-FLEX = flex
-BISON = bison
+FLEX = win_flex
+BISON = win_bison
 
-CFLAGS = -Wall -g -I.
-LDFLAGS = -lfl
+all: compilador.exe
 
-TARGET = compilador
-SOURCES = lex.l parser.y symbol_table.c type_checker.c code_gen.c
-OBJS = lex.yy.o parser.tab.o symbol_table.o type_checker.o code_gen.o
+# Gerar parser
+parser.tab.c parser.tab.h: parser.y symbol_table.h
+	$(BISON) -d -v parser.y
 
-all: $(TARGET)
+# Gerar lexer
+lex.yy.c: lex.l parser.tab.h
+	$(FLEX) lex.l
 
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+# Compilar módulos
+lexer.o: lex.yy.c parser.tab.h symbol_table.h
+	$(CC) -c lex.yy.c -o lexer.o
 
-lex.yy.c: lex.l
-	$(FLEX) -o $@ lex.l
-
-parser.tab.c parser.tab.h: parser.y
-	$(BISON) -d -v -o parser.tab.c parser.y
-
-lexer.o: lex.yy.c
-	$(CC) $(CFLAGS) -c -o $@ lex.yy.c
-
-parser.o: parser.tab.c parser.tab.h
-	$(CC) $(CFLAGS) -c -o $@ parser.tab.c
+parser.o: parser.tab.c parser.tab.h symbol_table.h
+	$(CC) -c parser.tab.c -o parser.o
 
 symbol_table.o: symbol_table.c symbol_table.h
-	$(CC) $(CFLAGS) -c -o $@ symbol_table.c
+	$(CC) -c symbol_table.c -o symbol_table.o
 
 type_checker.o: type_checker.c type_checker.h symbol_table.h
-	$(CC) $(CFLAGS) -c -o $@ type_checker.c
+	$(CC) -c type_checker.c -o type_checker.o
 
 code_gen.o: code_gen.c code_gen.h
-	$(CC) $(CFLAGS) -c -o $@ code_gen.c
+	$(CC) -c code_gen.c -o code_gen.o
 
+# Linking
+compilador.exe: lexer.o parser.o symbol_table.o
+	$(CC) lexer.o parser.o symbol_table.o -o compilador.exe
+
+# Limpar
 clean:
-	rm -f $(OBJS) lex.yy.c parser.tab.c parser.tab.h parser.output $(TARGET)
+	del /Q *.o lex.yy.c parser.tab.c parser.tab.h parser.output 2>nul
 
 .PHONY: all clean

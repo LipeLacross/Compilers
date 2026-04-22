@@ -507,13 +507,13 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 1 "lex.l"
 /*
  * Analisador Léxico (Scanner)Standalone
  * Projeto Compilador Pascal
  * Professor: Waldemar Pires Ferreira Neto
  */
-#line 8 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 8 "lex.l"
 #include <stdio.h>
 #include <string.h>
 
@@ -754,10 +754,10 @@ YY_DECL
 		}
 
 	{
-#line 38 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 38 "lex.l"
 
 
-#line 41 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 41 "lex.l"
  /* Comentários */
 #line 762 "lex.yy.c"
 
@@ -818,119 +818,119 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 43 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 43 "lex.l"
 BEGIN(COMMENT);
 	YY_BREAK
 
 
 case 2:
 YY_RULE_SETUP
-#line 46 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 46 "lex.l"
 BEGIN(INITIAL);
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 47 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 47 "lex.l"
 ;
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 48 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 48 "lex.l"
 num_lines++;
 	YY_BREAK
 
 /* Palavras reservadas */
 case 5:
 YY_RULE_SETUP
-#line 52 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 52 "lex.l"
 { printf("%-12s %s\n", "PROGRAM", yytext); num_tokens++; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 53 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 53 "lex.l"
 { printf("%-12s %s\n", "VAR", yytext); num_tokens++; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 54 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 54 "lex.l"
 { printf("%-12s %s\n", "INTEGER", yytext); num_tokens++; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 55 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 55 "lex.l"
 { printf("%-12s %s\n", "REAL", yytext); num_tokens++; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 56 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 56 "lex.l"
 { printf("%-12s %s\n", "PROCEDURE", yytext); num_tokens++; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 57 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 57 "lex.l"
 { printf("%-12s %s\n", "BEGIN", yytext); num_tokens++; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 58 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 58 "lex.l"
 { printf("%-12s %s\n", "END", yytext); num_tokens++; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 59 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 59 "lex.l"
 { printf("%-12s %s\n", "IF", yytext); num_tokens++; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 60 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 60 "lex.l"
 { printf("%-12s %s\n", "THEN", yytext); num_tokens++; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 61 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 61 "lex.l"
 { printf("%-12s %s\n", "ELSE", yytext); num_tokens++; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 62 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 62 "lex.l"
 { printf("%-12s %s\n", "WHILE", yytext); num_tokens++; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 63 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 63 "lex.l"
 { printf("%-12s %s\n", "DO", yytext); num_tokens++; }
 	YY_BREAK
 /* Operadores */
 case 17:
 YY_RULE_SETUP
-#line 66 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 66 "lex.l"
 { printf("%-12s %s\n", "ADDOP", yytext); num_tokens++; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 67 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 67 "lex.l"
 { printf("%-12s %s\n", "MULOP", yytext); num_tokens++; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 68 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 68 "lex.l"
 { printf("%-12s %s\n", "NOT", yytext); num_tokens++; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 69 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 69 "lex.l"
 { printf("%-12s %s\n", "MULOP", yytext); num_tokens++; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 70 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 70 "lex.l"
 { printf("%-12s %s\n", "MULOP", yytext); num_tokens++; }
 	YY_BREAK
 /* Identificador */
 case 22:
 YY_RULE_SETUP
-#line 73 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 73 "lex.l"
 {
     if (!is_reserved(yytext)) {
         printf("%-12s %s\n", "ID", yytext);
@@ -941,7 +941,7 @@ YY_RULE_SETUP
 /* Número real */
 case 23:
 YY_RULE_SETUP
-#line 81 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 81 "lex.l"
 {
     printf("%-12s %s\n", "NUM_REAL", yytext);
     num_tokens++;
@@ -950,7 +950,7 @@ YY_RULE_SETUP
 /* Número inteiro */
 case 24:
 YY_RULE_SETUP
-#line 87 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 87 "lex.l"
 {
     printf("%-12s %s\n", "NUM_INT", yytext);
     num_tokens++;
@@ -959,115 +959,115 @@ YY_RULE_SETUP
 /* Operadores relacionais */
 case 25:
 YY_RULE_SETUP
-#line 93 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 93 "lex.l"
 { printf("%-12s %s\n", "RELOP", yytext); num_tokens++; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 94 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 94 "lex.l"
 { printf("%-12s %s\n", "RELOP", yytext); num_tokens++; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 95 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 95 "lex.l"
 { printf("%-12s %s\n", "RELOP", yytext); num_tokens++; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 96 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 96 "lex.l"
 { printf("%-12s %s\n", "RELOP", yytext); num_tokens++; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 97 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 97 "lex.l"
 { printf("%-12s %s\n", "RELOP", yytext); num_tokens++; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 98 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 98 "lex.l"
 { printf("%-12s %s\n", "RELOP", yytext); num_tokens++; }
 	YY_BREAK
 /* Operadores aditivos */
 case 31:
 YY_RULE_SETUP
-#line 101 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 101 "lex.l"
 { printf("%-12s %s\n", "ADDOP", yytext); num_tokens++; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 102 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 102 "lex.l"
 { printf("%-12s %s\n", "ADDOP", yytext); num_tokens++; }
 	YY_BREAK
 /* Operadores multiplicativos */
 case 33:
 YY_RULE_SETUP
-#line 105 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 105 "lex.l"
 { printf("%-12s %s\n", "MULOP", yytext); num_tokens++; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 106 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 106 "lex.l"
 { printf("%-12s %s\n", "MULOP", yytext); num_tokens++; }
 	YY_BREAK
 /* Atribuição */
 case 35:
 YY_RULE_SETUP
-#line 109 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 109 "lex.l"
 { printf("%-12s %s\n", "ASSIGNOP", yytext); num_tokens++; }
 	YY_BREAK
 /* Delimitadores */
 case 36:
 YY_RULE_SETUP
-#line 112 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 112 "lex.l"
 { printf("%-12s %s\n", "DOT", yytext); num_tokens++; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 113 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 113 "lex.l"
 { printf("%-12s %s\n", "COLON", yytext); num_tokens++; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 114 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 114 "lex.l"
 { printf("%-12s %s\n", "SEMICOLON", yytext); num_tokens++; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 115 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 115 "lex.l"
 { printf("%-12s %s\n", "COMMA", yytext); num_tokens++; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 116 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 116 "lex.l"
 { printf("%-12s %s\n", "LPAREN", yytext); num_tokens++; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 117 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 117 "lex.l"
 { printf("%-12s %s\n", "RPAREN", yytext); num_tokens++; }
 	YY_BREAK
 /* Quebras de linha */
 case 42:
 /* rule 42 can match eol */
 YY_RULE_SETUP
-#line 120 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 120 "lex.l"
 { num_lines++; }
 	YY_BREAK
 /* Espaços em branco */
 case 43:
 YY_RULE_SETUP
-#line 123 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 123 "lex.l"
 { }
 	YY_BREAK
 /* Erro */
 case 44:
 YY_RULE_SETUP
-#line 126 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 126 "lex.l"
 { printf("%-12s %s (ERRO!)\n", "UNKNOWN", yytext); }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 128 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 128 "lex.l"
 ECHO;
 	YY_BREAK
 #line 1073 "lex.yy.c"
@@ -2076,7 +2076,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 128 "E:\\8. Programming\\Compilers\\projeto1-va-lexical-pascal\\lex.l"
+#line 128 "lex.l"
 
 
 int main(int argc, char *argv[]) {

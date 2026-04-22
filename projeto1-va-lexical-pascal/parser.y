@@ -15,7 +15,6 @@ extern int yyparse(void);
 extern FILE *yyin;
 
 void yyerror(const char *s);
-int main(int argc, char *argv[]);
 
 SymbolTable *global_table;
 SymbolType current_type;
@@ -253,24 +252,5 @@ Factor:
 %%
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Erro sintático na linha %d: %s\n", current_line, s);
-}
-
-int main(int argc, char *argv[]) {
-    global_table = create_table();
-    
-    if (argc > 1) {
-        yyin = fopen(argv[1], "r");
-        if (!yyin) {
-            fprintf(stderr, "Erro ao abrir arquivo: %s\n", argv[1]);
-            return 1;
-        }
-    } else {
-        yyin = stdin;
-    }
-    
-    yyparse();
-    free_table(global_table);
-    
-    return 0;
+    fprintf(stderr, "Erro sintático: %s\n", s);
 }

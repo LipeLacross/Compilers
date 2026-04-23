@@ -15,6 +15,7 @@ extern int yylex(void);
 extern int yyparse(void);
 extern FILE *yyin;
 void yyerror(const char *s);
+extern char yytext[];
 
 SymbolTable *sym_table;
 TypeChecker *type_check;
@@ -22,10 +23,16 @@ CodeGen *codegen;
 int current_line = 1;
 int yydebug = 0;
 
+char var_list[10][64];
+int var_count = 0;
+
 int yywrap(void) { return 1; }
 
-void add_var(const char *name, SymbolType type) {
-    insert_symbol(sym_table, name, type, KIND_VARIABLE, current_line);
+void add_vars(SymbolType t) {
+    for (int i = 0; i < var_count; i++) {
+        insert_symbol(sym_table, var_list[i], t, KIND_VARIABLE, current_line);
+    }
+    var_count = 0;
 }
 %}
 
@@ -84,19 +91,31 @@ VariableDeclarations:
 ;
 
 VariableDeclaration:
-    IdentifierList COLON Type SEMICOLON
-;
-
-IdentifierList:
-    ID
-    { add_var($1, TYPE_INTEGER); }
-|   IdentifierList COMMA ID
-    { add_var($3, TYPE_INTEGER); }
+    Type COLON VariableList SEMICOLON
 ;
 
 Type:
-    T_INTEGER { $$ = TYPE_INTEGER; }
-|   T_REAL { $$ = TYPE_REAL; }
+    T_INTEGER
+    {
+        for (int i = 0; i < var_count; i++) {
+            insert_symbol(sym_table, var_list[i], TYPE_INTEGER, KIND_VARIABLE, current_line);
+        }
+        var_count = 0;
+    }
+|   T_REAL
+    {
+        for (int i = 0; i < var_count; i++) {
+            insert_symbol(sym_table, var_list[i], TYPE_REAL, KIND_VARIABLE, current_line);
+        }
+        var_count = 0;
+    }
+;
+
+VariableList:
+    ID
+    { strcpy(var_list[var_count++], $1); }
+|   VariableList COMMA ID
+    { strcpy(var_list[var_count++], $3); }
 ;
 
 ProcedureDeclarations:

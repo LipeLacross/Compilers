@@ -1,5 +1,6 @@
 # Makefile - Compilador Pascal
 # Projeto 1 VA
+# Professor: Waldemar Pires Ferreira Neto
 
 CC = gcc
 FLEX = flex
@@ -9,13 +10,12 @@ CFLAGS = -I.
 
 all: compilador.exe
 
-# Gerar parser
-parser.tab.c parser.tab.h: parser.y symbol_table.h
-	$(BISON) -d -v parser.y
-
-# Gerar lexer
+# Gerar lexer e parser
 lex.yy.c: lex.l parser.tab.h
 	$(FLEX) lex.l
+
+parser.tab.c parser.tab.h: parser.y symbol_table.h
+	$(BISON) -d -v parser.y
 
 # Compilar módulos
 lexer.o: lex.yy.c parser.tab.h symbol_table.h
@@ -41,8 +41,12 @@ compilador.exe: lexer.o parser.o symbol_table.o type_checker.o code_gen.o
 run: compilador.exe
 	.\compilador.exe entrada.pas
 
+# Testar
+teste: compilador.exe
+	.\compilador.exe teste5.pas
+
 # Limpar
 clean:
-	del /Q *.o *.exe lex.yy.c lex.yy.h parser.tab.c parser.tab.h parser.output 2>nul
+	Remove-Item -Force *.o *.exe lex.yy.c lex.yy.h parser.tab.c parser.tab.h parser.output -ErrorAction SilentlyContinue
 
-.PHONY: all clean run
+.PHONY: all clean run teste

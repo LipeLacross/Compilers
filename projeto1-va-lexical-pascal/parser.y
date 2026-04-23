@@ -91,24 +91,19 @@ VariableDeclarations:
 ;
 
 VariableDeclaration:
-    Type COLON VariableList SEMICOLON
+    VariableList COLON Type SEMICOLON
+    {
+        /* Here we have the complete rule reduced - Type $$ has correct type */
+        for (int i = 0; i < var_count; i++) {
+            insert_symbol(sym_table, var_list[i], $3, KIND_VARIABLE, current_line);
+        }
+        var_count = 0;
+    }
 ;
 
 Type:
-    T_INTEGER
-    {
-        for (int i = 0; i < var_count; i++) {
-            insert_symbol(sym_table, var_list[i], TYPE_INTEGER, KIND_VARIABLE, current_line);
-        }
-        var_count = 0;
-    }
-|   T_REAL
-    {
-        for (int i = 0; i < var_count; i++) {
-            insert_symbol(sym_table, var_list[i], TYPE_REAL, KIND_VARIABLE, current_line);
-        }
-        var_count = 0;
-    }
+    T_INTEGER { $$ = TYPE_INTEGER; }
+|   T_REAL { $$ = TYPE_REAL; }
 ;
 
 VariableList:

@@ -1,3 +1,0 @@
-program ejemplo;
-begin
-end.

@@ -1,0 +1,3 @@
+program ejemplo;
+begin
+end.

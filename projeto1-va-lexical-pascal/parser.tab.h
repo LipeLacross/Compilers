@@ -58,22 +58,22 @@ extern int yydebug;
     NUM_INT = 259,                 /* NUM_INT  */
     NUM_REAL = 260,                /* NUM_REAL  */
     PROGRAM = 261,                 /* PROGRAM  */
-    VAR = 262,                     /* VAR  */
-    INTEGER = 263,                 /* INTEGER  */
-    REAL = 264,                    /* REAL  */
-    PROCEDURE = 265,               /* PROCEDURE  */
-    BEGIN = 266,                   /* BEGIN  */
-    END = 267,                     /* END  */
-    IF = 268,                      /* IF  */
-    THEN = 269,                    /* THEN  */
-    ELSE = 270,                    /* ELSE  */
-    WHILE = 271,                   /* WHILE  */
-    DO = 272,                      /* DO  */
-    OR = 273,                      /* OR  */
-    AND = 274,                     /* AND  */
-    NOT = 275,                     /* NOT  */
-    DIV = 276,                     /* DIV  */
-    MOD = 277,                     /* MOD  */
+    T_VAR = 262,                   /* T_VAR  */
+    T_INTEGER = 263,               /* T_INTEGER  */
+    T_REAL = 264,                  /* T_REAL  */
+    T_PROCEDURE = 265,             /* T_PROCEDURE  */
+    T_BEGIN = 266,                 /* T_BEGIN  */
+    T_END = 267,                   /* T_END  */
+    T_IF = 268,                    /* T_IF  */
+    T_THEN = 269,                  /* T_THEN  */
+    T_ELSE = 270,                  /* T_ELSE  */
+    T_WHILE = 271,                 /* T_WHILE  */
+    T_DO = 272,                    /* T_DO  */
+    T_OR = 273,                    /* T_OR  */
+    T_AND = 274,                   /* T_AND  */
+    T_NOT = 275,                   /* T_NOT  */
+    T_DIV = 276,                   /* T_DIV  */
+    T_MOD = 277,                   /* T_MOD  */
     RELOP = 278,                   /* RELOP  */
     ADDOP = 279,                   /* ADDOP  */
     MULOP = 280,                   /* MULOP  */
@@ -93,7 +93,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 22 "parser.y"
+#line 32 "parser.y"
 
     int intval;
     double realval;

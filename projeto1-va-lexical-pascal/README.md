@@ -1,90 +1,98 @@
 # Compilador Pascal - Projeto 1 VA
 
-**Disciplina:** Compiladores  
 **Professor:** Waldemar Pires Ferreira Neto
 
-Este projeto implementa um compilador para um subconjunto da linguagem Pascal, incluindo analisador léxico, tabela de símbolos, analisador sintático, verificador de tipos e gerador de código intermediário.
+## Components
 
-## Funcionalidades
-
-- **Analisador Léxico (Scanner)**: Reconhece tokens da linguagem Pascal
-- **Tabela de Símbolos**: Gerencia variáveis e procedimentos declarados
-- **Analisador Sintático (Parser)**: Verifica a correção sintática do programa
-- **Verificador de Tipos**: Realiza verificação de tipos estática
-- **Gerador de Código**: Gera código intermediário Three-Address Code (TAC)
-
-### Tokens Suportados
-
-| Categoria | Tokens |
-|-----------|--------|
-| Palavras-chave | `program`, `var`, `integer`, `real`, `procedure`, `begin`, `end`, `if`, `then`, `else`, `while`, `do` |
-| Operadores | `+`, `-`, `*`, `/`, `DIV`, `MOD`, `AND`, `OR`, `NOT` |
-| Relacionais | `=`, `>`, `<`, `>=`, `<=`, `<>` |
-| Identificador | `letter(letter\|digit)*` |
-| Número | Inteiros e reais |
-
-### Exemplo de Programa
-
-```pascal
-program exemplo;
-
-var
-x, y : integer;
-z : real;
-
-begin
-x := 1;
-y := 2;
-z := 3.5;
-
-if x > y then
-x := y
-else
-y := x;
-
-while x < y do
-x := x + 1
-end.
-```
-
-## Tecnologias
-
-- **GNU Flex** - Analisador léxico
-- **GNU Bison** - Analisador sintático
-- **GCC** - Compilador C
-
-## Estrutura do Projeto
-
-```
-projeto1-va-lexical-pascal/
-├── lex.l              # Analisador léxico (Flex)
-├── parser.y           # Analisador sintático (Bison)
-├── symbol_table.h/c   # Tabela de símbolos
-├── type_checker.h/c   # Verificador de tipos
-├── code_gen.h/c       # Gerador de código intermediário
-├── Makefile           # Script de compilação
-├── entrada.pas        # Arquivo de teste
-└── README.md         # Documentação
-```
+- **lex.l** - Analisador Léxico (Flex)
+- **parser.y** - Analisador Sintático (Bison)
+- **symbol_table.c/h** - Tabela de Símbolos
+- **type_checker.c/h** - Verificador de Tipos
+- **code_gen.c/h** - Gerador de Código
 
 ## Compilação
 
 ```bash
-make
+# Gera tudo
+flex lex.l
+bison -d -v parser.y
+
+# Compila módulos
+gcc -c lex.yy.c -I. -include symbol_table.h -o lexer.o
+gcc -c parser.tab.c -I. -o parser.o
+gcc -c symbol_table.c -I. -o symbol_table.o
+gcc -c type_checker.c -I. -o type_checker.o
+gcc -c code_gen.c -I. -o code_gen.o
+
+# Linka
+gcc lexer.o parser.o symbol_table.o type_checker.o code_gen.o -o compilador.exe
 ```
 
-## Execução
+Ou use o Makefile:
+```bash
+make all
+```
+
+## Uso
 
 ```bash
-./compilador entrada.pas
+# Compilar arquivo Pascal
+.\compilador.exe entrada.pas
+
+# ou via Makefile
+make run
 ```
 
-## Fluxo do Compilador
+## Gramática Suportada
 
 ```
-Código Fonte → Léxico → Parser → Verificador → Código Intermediário
+Program:     PROGRAM ID SEMICOLON [VAR Vars] [PROCEDURE ProcList] Block DOT
+Vars:        ID {COMMA ID} : Type SEMICOLON
+Type:        INTEGER | REAL
+Block:       BEGIN [Stmts] END
+Stmt:        ID := Expr
+            | IF Expr THEN Stmt [ELSE Stmt]
+            | WHILE Expr DO Stmt
+            | Block
+Expr:        Expr RELOP Expr
+            | Expr ADDOP Expr
+            | Expr MULOP Expr
+            | ID | NUM_INT | NUM_REAL
+            | ( Expr )
 ```
 
-## Licença
+## Tokens
 
-Este projeto está sob a licença Apache License 2.0.
+- **Reservados:** program, var, integer, real, procedure, begin, end, if, then, else, while, do, or, and, not, div, mod
+- **Identificador:** `[_a-zA-Z][_a-zA-Z0-9]*`
+- **Inteiro:** `[0-9]+`
+- **Real:** `[0-9]+\.[0-9]+`
+- **Operadores:** `+ - * / := >= <= <> > < =`
+- **Delimitadores:** `. : ; , ( )`
+
+## Exemplo
+
+```pascal
+program exemplo;
+var
+x, y : integer;
+z : real;
+begin
+x := 1;
+y := 2;
+z := 3.5;
+if x > y then
+x := y
+else
+y := x
+end.
+```
+
+## Status
+
+- ✅ Analisador Léxico completo
+- ✅ Analisador Sintático completo
+- ✅ Tabela de Símbolos
+- ✅ Verificador de Tipos
+- ✅ Gerador de Código (estrutura)
+- ⚠️ 2 shift/reduce conflicts (aceitável)

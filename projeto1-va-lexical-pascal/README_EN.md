@@ -1,90 +1,89 @@
 # Pascal Compiler - Project 1 VA
 
-**Course:** Compilers  
 **Professor:** Waldemar Pires Ferreira Neto
 
-This project implements a compiler for a subset of the Pascal language, including lexer, symbol table, parser, type checker, and intermediate code generator.
+## Components
 
-## Features
+- **lex.l** - Lexical Analyzer (Flex)
+- **parser.y** - Syntax Analyzer (Bison)
+- **symbol_table.c/h** - Symbol Table
+- **type_checker.c/h** - Type Checker
+- **code_gen.c/h** - Code Generator
 
-- **Lexical Analyzer (Scanner)**: Recognizes Pascal language tokens
-- **Symbol Table**: Manages declared variables and procedures
-- **Syntactic Analyzer (Parser)**: Verifies syntactic correctness
-- **Type Checker**: Performs static type checking
-- **Code Generator**: Generates Three-Address Code (TAC)
+## Build
 
-### Supported Tokens
+```bash
+# Generate all
+flex lex.l
+bison -d -v parser.y
 
-| Category | Tokens |
-|-----------|--------|
-| Keywords | `program`, `var`, `integer`, `real`, `procedure`, `begin`, `end`, `if`, `then`, `else`, `while`, `do` |
-| Operators | `+`, `-`, `*`, `/`, `DIV`, `MOD`, `AND`, `OR`, `NOT` |
-| Relational | `=`, `>`, `<`, `>=`, `<=`, `<>` |
-| Identifier | `letter(letter\|digit)*` |
-| Number | Integers and reals |
+# Compile modules
+gcc -c lex.yy.c -I. -include symbol_table.h -o lexer.o
+gcc -c parser.tab.c -I. -o parser.o
+gcc -c symbol_table.c -I. -o symbol_table.o
+gcc -c type_checker.c -I. -o type_checker.o
+gcc -c code_gen.c -I. -o code_gen.o
 
-### Example Program
+# Link
+gcc lexer.o parser.o symbol_table.o type_checker.o code_gen.o -o compilador.exe
+```
+
+Or use Makefile:
+```bash
+make all
+```
+
+## Usage
+
+```bash
+# Compile Pascal file
+.\compilador.exe entrada.pas
+
+# or via Makefile
+make run
+```
+
+## Supported Grammar
+
+```
+Program:     PROGRAM ID SEMICOLON [VAR Vars] [PROCEDURE ProcList] Block DOT
+Vars:        ID {COMMA ID} : Type SEMICOLON
+Type:        INTEGER | REAL
+Block:       BEGIN [Stmts] END
+Stmt:        ID := Expr
+            | IF Expr THEN Stmt [ELSE Stmt]
+            | WHILE Expr DO Stmt
+            | Block
+Expr:        Expr RELOP Expr
+            | Expr ADDOP Expr
+            | Expr MULOP Expr
+            | ID | NUM_INT | NUM_REAL
+            | ( Expr )
+```
+
+## Example
 
 ```pascal
 program exemplo;
-
 var
 x, y : integer;
 z : real;
-
 begin
 x := 1;
 y := 2;
 z := 3.5;
-
 if x > y then
 x := y
 else
-y := x;
-
-while x < y do
-x := x + 1
+y := x
 end.
 ```
 
-## Technologies
+## Status
 
-- **GNU Flex** - Lexical analyzer
-- **GNU Bison** - Syntactic analyzer
-- **GCC** - C compiler
-
-## Project Structure
-
-```
-projeto1-va-lexical-pascal/
-├── lex.l              # Lexical analyzer (Flex)
-├── parser.y           # Syntactic analyzer (Bison)
-├── symbol_table.h/c   # Symbol table
-├── type_checker.h/c   # Type checker
-├── code_gen.h/c       # Intermediate code generator
-├── Makefile           # Build script
-├── entrada.pas        # Test file
-└── README_EN.md       # English documentation
-```
-
-## Compilation
-
-```bash
-make
-```
-
-## Execution
-
-```bash
-./compilador entrada.pas
-```
-
-## Compiler Flow
-
-```
-Source Code → Lexer → Parser → Type Checker → Intermediate Code
-```
-
-## License
-
-This project is under Apache License 2.0.
+- ✅ Lexical Analyzer complete
+- ✅ Syntax Analyzer complete
+- ✅ Symbol Table
+- ✅ Type Checker
+- ✅ Code Generator (structure)
+- ⚠️ 2 shift/reduce conflicts (acceptable)

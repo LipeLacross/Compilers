@@ -1,6 +1,5 @@
 /*
- * Compilador Pascal Completo
- * Projeto 1 VA
+ * Compilador Pascal - Projeto 1 VA
  * Professor: Waldemar Pires Ferreira Neto
  */
 
@@ -9,16 +8,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include "symbol_table.h"
+#include "type_checker.h"
+#include "code_gen.h"
 
-int yylex(void);
-int yyparse(void);
-void yyerror(const char *s);
+extern int yylex(void);
+extern int yyparse(void);
 extern FILE *yyin;
+void yyerror(const char *s);
 
 SymbolTable *sym_table;
+TypeChecker *type_check;
+CodeGen *codegen;
 int current_line = 1;
-int yylex(void);
-int yyparse(void);
+int yydebug = 0;
+
+int yywrap(void) { return 1; }
+
+void add_var(const char *name, SymbolType type) {
+    insert_symbol(sym_table, name, type, KIND_VARIABLE, current_line);
+}
 %}
 
 %union {
@@ -31,19 +39,19 @@ int yyparse(void);
 %token <string> ID
 %token <intval> NUM_INT
 %token <realval> NUM_REAL
-%token PROGRAM VAR INTEGER REAL PROCEDURE BEGIN END IF THEN ELSE WHILE DO
-%token OR AND NOT DIV MOD
+%token PROGRAM T_VAR T_INTEGER T_REAL T_PROCEDURE T_BEGIN T_END T_IF T_THEN T_ELSE T_WHILE T_DO
+%token T_OR T_AND T_NOT T_DIV T_MOD
 %token <string> RELOP ADDOP MULOP ASSIGNOP DOT COLON SEMICOLON COMMA LPAREN RPAREN
 
 %type <type> Type
 
 %right ASSIGNOP
-%left OR
-%left AND
+%left T_OR
+%left T_AND
 %left RELOP
 %left ADDOP
-%left MULOP DIV MOD
-%left NOT
+%left MULOP T_DIV T_MOD
+%left T_NOT
 %left UMINUS
 
 %start Program
@@ -51,92 +59,139 @@ int yyparse(void);
 %%
 
 Program:
-    Header Block DOT
-    {
-        printf("\n=== Compilacao OK ===\n");
-        print_table(sym_table);
-    }
+    Header Declarations Block DOT
 ;
 
 Header:
     PROGRAM ID SEMICOLON
-    {
-        insert_symbol(sym_table, $2, TYPE_PROCEDURE, KIND_PROCEDURE, current_line);
-    }
-|   PROGRAM ID SEMICOLON VAR Vars
-|   PROGRAM ID SEMICOLON VAR Vars PROCEDURE ID SEMICOLON Block
-|   PROGRAM ID SEMICOLON PROCEDURE ID SEMICOLON Block
+    { insert_symbol(sym_table, $2, TYPE_PROCEDURE, KIND_PROCEDURE, current_line); }
 ;
 
-Vars:
-    ID COLON Type SEMICOLON
-    {
-        insert_symbol(sym_table, $1, $3, KIND_VARIABLE, current_line);
-    }
-|   Vars ID COLON Type SEMICOLON
-    {
-        insert_symbol(sym_table, $2, $4, KIND_VARIABLE, current_line);
-    }
+Declarations:
+    VariableDeclarationSection ProcedureDeclarations
+|   VariableDeclarationSection
+|   ProcedureDeclarations
+|   /* ε */
+;
+
+VariableDeclarationSection:
+    T_VAR VariableDeclarations
+;
+
+VariableDeclarations:
+    VariableDeclaration
+|   VariableDeclarations VariableDeclaration
+;
+
+VariableDeclaration:
+    IdentifierList COLON Type SEMICOLON
+;
+
+IdentifierList:
+    ID
+    { add_var($1, TYPE_INTEGER); }
+|   IdentifierList COMMA ID
+    { add_var($3, TYPE_INTEGER); }
 ;
 
 Type:
-    INTEGER { $$ = TYPE_INTEGER; }
-|   REAL { $$ = TYPE_REAL; }
+    T_INTEGER { $$ = TYPE_INTEGER; }
+|   T_REAL { $$ = TYPE_REAL; }
+;
+
+ProcedureDeclarations:
+    ProcedureHeader Declarations Block SEMICOLON
+|   ProcedureDeclarations ProcedureHeader Declarations Block SEMICOLON
+;
+
+ProcedureHeader:
+    T_PROCEDURE ID SEMICOLON
+    { insert_symbol(sym_table, $2, TYPE_PROCEDURE, KIND_PROCEDURE, current_line); }
+;
+
+Declarations:
+    VariableDeclarationSection
+|   /* ε */
 ;
 
 Block:
-    BEGIN END
-|   BEGIN Stmts END
+    T_BEGIN T_END
+|   T_BEGIN Statements T_END
 ;
 
-Stmts:
-    Stmt
-|   Stmts SEMICOLON Stmt
+Statements:
+    Statement
+|   Statements SEMICOLON Statement
 ;
 
-Stmt:
-    ID ASSIGNOP Expr
+Statement:
+    ID ASSIGNOP Expression
     {
-        if (!lookup_symbol(sym_table, $1))
-            fprintf(stderr, "Aviso: '%s' nao declarado\n", $1);
+        Symbol *sym = lookup_symbol(sym_table, $1);
+        if (!sym) fprintf(stderr, "Aviso: '%s' nao declarado\n", $1);
     }
 |   ID LPAREN RPAREN
-|   IF Expr THEN Stmt
-|   IF Expr THEN Stmt ELSE Stmt
-|   WHILE Expr DO Stmt
 |   Block
+|   T_IF Expression T_THEN Statement ElseClause
+|   T_WHILE Expression T_DO Statement
+|   /* ε */
 ;
 
-Expr:
-    Expr RELOP Expr
-|   Expr ADDOP Expr
-|   Expr MULOP Expr
-|   Expr DIV Expr
-|   Expr MOD Expr
-|   Expr AND Expr
-|   NOT Expr
-|   ID
+ElseClause:
+    T_ELSE Statement
+|   /* ε */
+;
+
+Expression:
+    SimpleExpression RELOP SimpleExpression
+|   SimpleExpression
+;
+
+SimpleExpression:
+    Term
+|   ADDOP Term
+|   SimpleExpression ADDOP Term
+|   SimpleExpression T_OR Term
+;
+
+Term:
+    Term MULOP Factor
+|   Term T_DIV Factor
+|   Term T_MOD Factor
+|   Term T_AND Factor
+|   Factor
+;
+
+Factor:
+    ID
 |   NUM_INT
 |   NUM_REAL
-|   LPAREN Expr RPAREN
+|   LPAREN Expression RPAREN
+|   T_NOT Factor
 ;
 
 %%
 
-void yyerror(const char *s) {
-    fprintf(stderr, "Erro: %s\n", s);
-}
+void yyerror(const char *s) { fprintf(stderr, "Erro: %s\n", s); }
 
 int main(int argc, char *argv[]) {
     sym_table = create_table();
+    type_check = create_type_checker(sym_table);
+    codegen = create_codegen();
+    
     if (argc > 1) {
         yyin = fopen(argv[1], "r");
         if (!yyin) { fprintf(stderr, "Erro: %s\n", argv[1]); return 1; }
     }
+    
     printf("=== Compilador Pascal ===\n");
     yyparse();
+    
+    printf("\n=== OK ===\n");
+    print_table(sym_table);
+    
     free_table(sym_table);
+    free_type_checker(type_check);
+    free_codegen(codegen);
     return 0;
 }
-
-int yywrap(void) { return 1; }

@@ -1,124 +1,188 @@
 Terminals unused in grammar
 
-    OR
-    AND
-    LPAREN
-    RPAREN
-    EQ
-    NEQ
+    UMINUS
 
 
-State 45 conflicts: 1 shift/reduce
+Rules useless in parser due to conflicts
+
+   18 Declarations: VariableDeclarationSection
+   19             | %empty
+
+
+State 3 conflicts: 1 reduce/reduce
+State 9 conflicts: 1 reduce/reduce
+State 11 conflicts: 1 reduce/reduce
+State 18 conflicts: 1 shift/reduce
+State 21 conflicts: 1 reduce/reduce
+State 76 conflicts: 1 shift/reduce
 
 
 Grammar
 
     0 $accept: Program $end
 
-    1 Program: Header Block DOT
+    1 Program: Header Declarations Block DOT
 
     2 Header: PROGRAM ID SEMICOLON
-    3       | PROGRAM ID SEMICOLON VAR ListVar SEMICOLON
-    4       | PROGRAM ID SEMICOLON VAR ListVar SEMICOLON PROCEDURE ID SEMICOLON Block SEMICOLON
 
-    5 ListVar: ID COLON Type
-    6        | ListVar COMMA ID COLON Type
+    3 Declarations: VariableDeclarationSection ProcedureDeclarations
+    4             | VariableDeclarationSection
+    5             | ProcedureDeclarations
+    6             | %empty
 
-    7 Type: INTEGER
-    8     | REAL
+    7 VariableDeclarationSection: T_VAR VariableDeclarations
 
-    9 Block: BEGIN END
-   10      | BEGIN StmtList END
+    8 VariableDeclarations: VariableDeclaration
+    9                     | VariableDeclarations VariableDeclaration
 
-   11 StmtList: Stmt
-   12         | StmtList SEMICOLON Stmt
+   10 VariableDeclaration: IdentifierList COLON Type SEMICOLON
 
-   13 Stmt: ID ASSIGNOP Expr
-   14     | IF Expr THEN Stmt
-   15     | IF Expr THEN Stmt ELSE Stmt
-   16     | WHILE Expr DO Stmt
-   17     | Block
+   11 IdentifierList: ID
+   12               | IdentifierList COMMA ID
 
-   18 Expr: ID
-   19     | NUM_INT
-   20     | NUM_REAL
-   21     | Expr RELOP Expr
-   22     | Expr ADDOP Expr
-   23     | Expr MULOP Expr
-   24     | Expr DIV Expr
-   25     | Expr MOD Expr
-   26     | NOT Expr
-   27     | '(' Expr ')'
+   13 Type: T_INTEGER
+   14     | T_REAL
+
+   15 ProcedureDeclarations: ProcedureHeader Declarations Block SEMICOLON
+   16                      | ProcedureDeclarations ProcedureHeader Declarations Block SEMICOLON
+
+   17 ProcedureHeader: T_PROCEDURE ID SEMICOLON
+
+   18 Declarations: VariableDeclarationSection
+   19             | %empty
+
+   20 Block: T_BEGIN T_END
+   21      | T_BEGIN Statements T_END
+
+   22 Statements: Statement
+   23           | Statements SEMICOLON Statement
+
+   24 Statement: ID ASSIGNOP Expression
+   25          | ID LPAREN RPAREN
+   26          | Block
+   27          | T_IF Expression T_THEN Statement ElseClause
+   28          | T_WHILE Expression T_DO Statement
+   29          | %empty
+
+   30 ElseClause: T_ELSE Statement
+   31           | %empty
+
+   32 Expression: SimpleExpression RELOP SimpleExpression
+   33           | SimpleExpression
+
+   34 SimpleExpression: Term
+   35                 | ADDOP Term
+   36                 | SimpleExpression ADDOP Term
+   37                 | SimpleExpression T_OR Term
+
+   38 Term: Term MULOP Factor
+   39     | Term T_DIV Factor
+   40     | Term T_MOD Factor
+   41     | Term T_AND Factor
+   42     | Factor
+
+   43 Factor: ID
+   44       | NUM_INT
+   45       | NUM_REAL
+   46       | LPAREN Expression RPAREN
+   47       | T_NOT Factor
 
 
 Terminals, with rules where they appear
 
     $end (0) 0
-    '(' (40) 27
-    ')' (41) 27
     error (256)
-    PROGRAM (258) 2 3 4
-    VAR (259) 3 4
-    INTEGER (260) 7
-    REAL (261) 8
-    PROCEDURE (262) 4
-    BEGIN (263) 9 10
-    END (264) 9 10
-    IF (265) 14 15
-    THEN (266) 14 15
-    ELSE (267) 15
-    WHILE (268) 16
-    DO (269) 16
-    OR (270)
-    AND (271)
-    NOT (272) 26
-    DIV (273) 24
-    MOD (274) 25
-    ID <string> (275) 2 3 4 5 6 13 18
-    NUM_INT <intval> (276) 19
-    NUM_REAL <realval> (277) 20
-    RELOP <string> (278) 21
-    ADDOP <string> (279) 22
-    MULOP <string> (280) 23
-    ASSIGNOP <string> (281) 13
+    ID <string> (258) 2 11 12 17 24 25 43
+    NUM_INT <intval> (259) 44
+    NUM_REAL <realval> (260) 45
+    PROGRAM (261) 2
+    T_VAR (262) 7
+    T_INTEGER (263) 13
+    T_REAL (264) 14
+    T_PROCEDURE (265) 17
+    T_BEGIN (266) 20 21
+    T_END (267) 20 21
+    T_IF (268) 27
+    T_THEN (269) 27
+    T_ELSE (270) 30
+    T_WHILE (271) 28
+    T_DO (272) 28
+    T_OR (273) 37
+    T_AND (274) 41
+    T_NOT (275) 47
+    T_DIV (276) 39
+    T_MOD (277) 40
+    RELOP <string> (278) 32
+    ADDOP <string> (279) 35 36
+    MULOP <string> (280) 38
+    ASSIGNOP <string> (281) 24
     DOT <string> (282) 1
-    COLON <string> (283) 5 6
-    SEMICOLON <string> (284) 2 3 4 12
-    COMMA <string> (285) 6
-    LPAREN <string> (286)
-    RPAREN <string> (287)
-    EQ (288)
-    NEQ (289)
+    COLON <string> (283) 10
+    SEMICOLON <string> (284) 2 10 15 16 17 23
+    COMMA <string> (285) 12
+    LPAREN <string> (286) 25 46
+    RPAREN <string> (287) 25 46
+    UMINUS (288)
 
 
 Nonterminals, with rules where they appear
 
-    $accept (37)
+    $accept (34)
         on left: 0
-    Program (38)
+    Program (35)
         on left: 1
         on right: 0
-    Header (39)
-        on left: 2 3 4
+    Header (36)
+        on left: 2
         on right: 1
-    ListVar (40)
-        on left: 5 6
-        on right: 3 4 6
-    Type <type> (41)
-        on left: 7 8
-        on right: 5 6
-    Block (42)
-        on left: 9 10
-        on right: 1 4 17
-    StmtList (43)
+    Declarations (37)
+        on left: 3 4 5 6 18 19
+        on right: 1 15 16
+    VariableDeclarationSection (38)
+        on left: 7
+        on right: 3 4 18
+    VariableDeclarations (39)
+        on left: 8 9
+        on right: 7 9
+    VariableDeclaration (40)
+        on left: 10
+        on right: 8 9
+    IdentifierList (41)
         on left: 11 12
         on right: 10 12
-    Stmt (44)
-        on left: 13 14 15 16 17
-        on right: 11 12 14 15 16
-    Expr (45)
-        on left: 18 19 20 21 22 23 24 25 26 27
-        on right: 13 14 15 16 21 22 23 24 25 26 27
+    Type <type> (42)
+        on left: 13 14
+        on right: 10
+    ProcedureDeclarations (43)
+        on left: 15 16
+        on right: 3 5 16
+    ProcedureHeader (44)
+        on left: 17
+        on right: 15 16
+    Block (45)
+        on left: 20 21
+        on right: 1 15 16 26
+    Statements (46)
+        on left: 22 23
+        on right: 21 23
+    Statement (47)
+        on left: 24 25 26 27 28 29
+        on right: 22 23 27 28 30
+    ElseClause (48)
+        on left: 30 31
+        on right: 27
+    Expression (49)
+        on left: 32 33
+        on right: 24 27 28 46
+    SimpleExpression (50)
+        on left: 34 35 36 37
+        on right: 32 33 36 37
+    Term (51)
+        on left: 38 39 40 41 42
+        on right: 34 35 36 37 38 39 40 41
+    Factor (52)
+        on left: 43 44 45 46 47
+        on right: 38 39 40 41 42 47
 
 
 State 0
@@ -134,8 +198,6 @@ State 0
 State 1
 
     2 Header: PROGRAM . ID SEMICOLON
-    3       | PROGRAM . ID SEMICOLON VAR ListVar SEMICOLON
-    4       | PROGRAM . ID SEMICOLON VAR ListVar SEMICOLON PROCEDURE ID SEMICOLON Block SEMICOLON
 
     ID  shift, and go to state 4
 
@@ -149,20 +211,26 @@ State 2
 
 State 3
 
-    1 Program: Header . Block DOT
+    1 Program: Header . Declarations Block DOT
 
-    BEGIN  shift, and go to state 6
+    T_VAR        shift, and go to state 6
+    T_PROCEDURE  shift, and go to state 7
 
-    Block  go to state 7
+    T_BEGIN   reduce using rule 6 (Declarations)
+    T_BEGIN   [reduce using rule 19 (Declarations)]
+    $default  reduce using rule 6 (Declarations)
+
+    Declarations                go to state 8
+    VariableDeclarationSection  go to state 9
+    ProcedureDeclarations       go to state 10
+    ProcedureHeader             go to state 11
 
 
 State 4
 
     2 Header: PROGRAM ID . SEMICOLON
-    3       | PROGRAM ID . SEMICOLON VAR ListVar SEMICOLON
-    4       | PROGRAM ID . SEMICOLON VAR ListVar SEMICOLON PROCEDURE ID SEMICOLON Block SEMICOLON
 
-    SEMICOLON  shift, and go to state 8
+    SEMICOLON  shift, and go to state 12
 
 
 State 5
@@ -174,615 +242,834 @@ State 5
 
 State 6
 
-    9 Block: BEGIN . END
-   10      | BEGIN . StmtList END
+    7 VariableDeclarationSection: T_VAR . VariableDeclarations
 
-    BEGIN  shift, and go to state 6
-    END    shift, and go to state 9
-    IF     shift, and go to state 10
-    WHILE  shift, and go to state 11
-    ID     shift, and go to state 12
+    ID  shift, and go to state 13
 
-    Block     go to state 13
-    StmtList  go to state 14
-    Stmt      go to state 15
+    VariableDeclarations  go to state 14
+    VariableDeclaration   go to state 15
+    IdentifierList        go to state 16
 
 
 State 7
 
-    1 Program: Header Block . DOT
+   17 ProcedureHeader: T_PROCEDURE . ID SEMICOLON
 
-    DOT  shift, and go to state 16
+    ID  shift, and go to state 17
 
 
 State 8
 
-    2 Header: PROGRAM ID SEMICOLON .
-    3       | PROGRAM ID SEMICOLON . VAR ListVar SEMICOLON
-    4       | PROGRAM ID SEMICOLON . VAR ListVar SEMICOLON PROCEDURE ID SEMICOLON Block SEMICOLON
+    1 Program: Header Declarations . Block DOT
 
-    VAR  shift, and go to state 17
+    T_BEGIN  shift, and go to state 18
 
-    $default  reduce using rule 2 (Header)
+    Block  go to state 19
 
 
 State 9
 
-    9 Block: BEGIN END .
+    3 Declarations: VariableDeclarationSection . ProcedureDeclarations
+    4             | VariableDeclarationSection .
+   18             | VariableDeclarationSection .
 
-    $default  reduce using rule 9 (Block)
+    T_PROCEDURE  shift, and go to state 7
+
+    T_BEGIN   reduce using rule 4 (Declarations)
+    T_BEGIN   [reduce using rule 18 (Declarations)]
+    $default  reduce using rule 4 (Declarations)
+
+    ProcedureDeclarations  go to state 20
+    ProcedureHeader        go to state 11
 
 
 State 10
 
-   14 Stmt: IF . Expr THEN Stmt
-   15     | IF . Expr THEN Stmt ELSE Stmt
+    5 Declarations: ProcedureDeclarations .
+   16 ProcedureDeclarations: ProcedureDeclarations . ProcedureHeader Declarations Block SEMICOLON
 
-    NOT       shift, and go to state 18
-    ID        shift, and go to state 19
-    NUM_INT   shift, and go to state 20
-    NUM_REAL  shift, and go to state 21
-    '('       shift, and go to state 22
+    T_PROCEDURE  shift, and go to state 7
 
-    Expr  go to state 23
+    $default  reduce using rule 5 (Declarations)
+
+    ProcedureHeader  go to state 21
 
 
 State 11
 
-   16 Stmt: WHILE . Expr DO Stmt
+   15 ProcedureDeclarations: ProcedureHeader . Declarations Block SEMICOLON
 
-    NOT       shift, and go to state 18
-    ID        shift, and go to state 19
-    NUM_INT   shift, and go to state 20
-    NUM_REAL  shift, and go to state 21
-    '('       shift, and go to state 22
+    T_VAR        shift, and go to state 6
+    T_PROCEDURE  shift, and go to state 7
 
-    Expr  go to state 24
+    T_BEGIN   reduce using rule 6 (Declarations)
+    T_BEGIN   [reduce using rule 19 (Declarations)]
+    $default  reduce using rule 6 (Declarations)
+
+    Declarations                go to state 22
+    VariableDeclarationSection  go to state 9
+    ProcedureDeclarations       go to state 10
+    ProcedureHeader             go to state 11
 
 
 State 12
 
-   13 Stmt: ID . ASSIGNOP Expr
+    2 Header: PROGRAM ID SEMICOLON .
 
-    ASSIGNOP  shift, and go to state 25
+    $default  reduce using rule 2 (Header)
 
 
 State 13
 
-   17 Stmt: Block .
+   11 IdentifierList: ID .
 
-    $default  reduce using rule 17 (Stmt)
+    $default  reduce using rule 11 (IdentifierList)
 
 
 State 14
 
-   10 Block: BEGIN StmtList . END
-   12 StmtList: StmtList . SEMICOLON Stmt
+    7 VariableDeclarationSection: T_VAR VariableDeclarations .
+    9 VariableDeclarations: VariableDeclarations . VariableDeclaration
 
-    END        shift, and go to state 26
-    SEMICOLON  shift, and go to state 27
+    ID  shift, and go to state 13
+
+    $default  reduce using rule 7 (VariableDeclarationSection)
+
+    VariableDeclaration  go to state 23
+    IdentifierList       go to state 16
 
 
 State 15
 
-   11 StmtList: Stmt .
+    8 VariableDeclarations: VariableDeclaration .
 
-    $default  reduce using rule 11 (StmtList)
+    $default  reduce using rule 8 (VariableDeclarations)
 
 
 State 16
 
-    1 Program: Header Block DOT .
+   10 VariableDeclaration: IdentifierList . COLON Type SEMICOLON
+   12 IdentifierList: IdentifierList . COMMA ID
 
-    $default  reduce using rule 1 (Program)
+    COLON  shift, and go to state 24
+    COMMA  shift, and go to state 25
 
 
 State 17
 
-    3 Header: PROGRAM ID SEMICOLON VAR . ListVar SEMICOLON
-    4       | PROGRAM ID SEMICOLON VAR . ListVar SEMICOLON PROCEDURE ID SEMICOLON Block SEMICOLON
+   17 ProcedureHeader: T_PROCEDURE ID . SEMICOLON
 
-    ID  shift, and go to state 28
-
-    ListVar  go to state 29
+    SEMICOLON  shift, and go to state 26
 
 
 State 18
 
-   26 Expr: NOT . Expr
+   20 Block: T_BEGIN . T_END
+   21      | T_BEGIN . Statements T_END
 
-    NOT       shift, and go to state 18
-    ID        shift, and go to state 19
-    NUM_INT   shift, and go to state 20
-    NUM_REAL  shift, and go to state 21
-    '('       shift, and go to state 22
+    ID       shift, and go to state 27
+    T_BEGIN  shift, and go to state 18
+    T_END    shift, and go to state 28
+    T_IF     shift, and go to state 29
+    T_WHILE  shift, and go to state 30
 
-    Expr  go to state 30
+    T_END     [reduce using rule 29 (Statement)]
+    $default  reduce using rule 29 (Statement)
+
+    Block       go to state 31
+    Statements  go to state 32
+    Statement   go to state 33
 
 
 State 19
 
-   18 Expr: ID .
+    1 Program: Header Declarations Block . DOT
 
-    $default  reduce using rule 18 (Expr)
+    DOT  shift, and go to state 34
 
 
 State 20
 
-   19 Expr: NUM_INT .
+    3 Declarations: VariableDeclarationSection ProcedureDeclarations .
+   16 ProcedureDeclarations: ProcedureDeclarations . ProcedureHeader Declarations Block SEMICOLON
 
-    $default  reduce using rule 19 (Expr)
+    T_PROCEDURE  shift, and go to state 7
+
+    $default  reduce using rule 3 (Declarations)
+
+    ProcedureHeader  go to state 21
 
 
 State 21
 
-   20 Expr: NUM_REAL .
+   16 ProcedureDeclarations: ProcedureDeclarations ProcedureHeader . Declarations Block SEMICOLON
 
-    $default  reduce using rule 20 (Expr)
+    T_VAR        shift, and go to state 6
+    T_PROCEDURE  shift, and go to state 7
+
+    T_BEGIN   reduce using rule 6 (Declarations)
+    T_BEGIN   [reduce using rule 19 (Declarations)]
+    $default  reduce using rule 6 (Declarations)
+
+    Declarations                go to state 35
+    VariableDeclarationSection  go to state 9
+    ProcedureDeclarations       go to state 10
+    ProcedureHeader             go to state 11
 
 
 State 22
 
-   27 Expr: '(' . Expr ')'
+   15 ProcedureDeclarations: ProcedureHeader Declarations . Block SEMICOLON
 
-    NOT       shift, and go to state 18
-    ID        shift, and go to state 19
-    NUM_INT   shift, and go to state 20
-    NUM_REAL  shift, and go to state 21
-    '('       shift, and go to state 22
+    T_BEGIN  shift, and go to state 18
 
-    Expr  go to state 31
+    Block  go to state 36
 
 
 State 23
 
-   14 Stmt: IF Expr . THEN Stmt
-   15     | IF Expr . THEN Stmt ELSE Stmt
-   21 Expr: Expr . RELOP Expr
-   22     | Expr . ADDOP Expr
-   23     | Expr . MULOP Expr
-   24     | Expr . DIV Expr
-   25     | Expr . MOD Expr
+    9 VariableDeclarations: VariableDeclarations VariableDeclaration .
 
-    THEN   shift, and go to state 32
-    DIV    shift, and go to state 33
-    MOD    shift, and go to state 34
-    RELOP  shift, and go to state 35
-    ADDOP  shift, and go to state 36
-    MULOP  shift, and go to state 37
+    $default  reduce using rule 9 (VariableDeclarations)
 
 
 State 24
 
-   16 Stmt: WHILE Expr . DO Stmt
-   21 Expr: Expr . RELOP Expr
-   22     | Expr . ADDOP Expr
-   23     | Expr . MULOP Expr
-   24     | Expr . DIV Expr
-   25     | Expr . MOD Expr
+   10 VariableDeclaration: IdentifierList COLON . Type SEMICOLON
 
-    DO     shift, and go to state 38
-    DIV    shift, and go to state 33
-    MOD    shift, and go to state 34
-    RELOP  shift, and go to state 35
-    ADDOP  shift, and go to state 36
-    MULOP  shift, and go to state 37
+    T_INTEGER  shift, and go to state 37
+    T_REAL     shift, and go to state 38
+
+    Type  go to state 39
 
 
 State 25
 
-   13 Stmt: ID ASSIGNOP . Expr
+   12 IdentifierList: IdentifierList COMMA . ID
 
-    NOT       shift, and go to state 18
-    ID        shift, and go to state 19
-    NUM_INT   shift, and go to state 20
-    NUM_REAL  shift, and go to state 21
-    '('       shift, and go to state 22
-
-    Expr  go to state 39
+    ID  shift, and go to state 40
 
 
 State 26
 
-   10 Block: BEGIN StmtList END .
+   17 ProcedureHeader: T_PROCEDURE ID SEMICOLON .
 
-    $default  reduce using rule 10 (Block)
+    $default  reduce using rule 17 (ProcedureHeader)
 
 
 State 27
 
-   12 StmtList: StmtList SEMICOLON . Stmt
+   24 Statement: ID . ASSIGNOP Expression
+   25          | ID . LPAREN RPAREN
 
-    BEGIN  shift, and go to state 6
-    IF     shift, and go to state 10
-    WHILE  shift, and go to state 11
-    ID     shift, and go to state 12
-
-    Block  go to state 13
-    Stmt   go to state 40
+    ASSIGNOP  shift, and go to state 41
+    LPAREN    shift, and go to state 42
 
 
 State 28
 
-    5 ListVar: ID . COLON Type
+   20 Block: T_BEGIN T_END .
 
-    COLON  shift, and go to state 41
+    $default  reduce using rule 20 (Block)
 
 
 State 29
 
-    3 Header: PROGRAM ID SEMICOLON VAR ListVar . SEMICOLON
-    4       | PROGRAM ID SEMICOLON VAR ListVar . SEMICOLON PROCEDURE ID SEMICOLON Block SEMICOLON
-    6 ListVar: ListVar . COMMA ID COLON Type
+   27 Statement: T_IF . Expression T_THEN Statement ElseClause
 
-    SEMICOLON  shift, and go to state 42
-    COMMA      shift, and go to state 43
+    ID        shift, and go to state 43
+    NUM_INT   shift, and go to state 44
+    NUM_REAL  shift, and go to state 45
+    T_NOT     shift, and go to state 46
+    ADDOP     shift, and go to state 47
+    LPAREN    shift, and go to state 48
+
+    Expression        go to state 49
+    SimpleExpression  go to state 50
+    Term              go to state 51
+    Factor            go to state 52
 
 
 State 30
 
-   21 Expr: Expr . RELOP Expr
-   22     | Expr . ADDOP Expr
-   23     | Expr . MULOP Expr
-   24     | Expr . DIV Expr
-   25     | Expr . MOD Expr
-   26     | NOT Expr .
+   28 Statement: T_WHILE . Expression T_DO Statement
 
-    $default  reduce using rule 26 (Expr)
+    ID        shift, and go to state 43
+    NUM_INT   shift, and go to state 44
+    NUM_REAL  shift, and go to state 45
+    T_NOT     shift, and go to state 46
+    ADDOP     shift, and go to state 47
+    LPAREN    shift, and go to state 48
+
+    Expression        go to state 53
+    SimpleExpression  go to state 50
+    Term              go to state 51
+    Factor            go to state 52
 
 
 State 31
 
-   21 Expr: Expr . RELOP Expr
-   22     | Expr . ADDOP Expr
-   23     | Expr . MULOP Expr
-   24     | Expr . DIV Expr
-   25     | Expr . MOD Expr
-   27     | '(' Expr . ')'
+   26 Statement: Block .
 
-    DIV    shift, and go to state 33
-    MOD    shift, and go to state 34
-    RELOP  shift, and go to state 35
-    ADDOP  shift, and go to state 36
-    MULOP  shift, and go to state 37
-    ')'    shift, and go to state 44
+    $default  reduce using rule 26 (Statement)
 
 
 State 32
 
-   14 Stmt: IF Expr THEN . Stmt
-   15     | IF Expr THEN . Stmt ELSE Stmt
+   21 Block: T_BEGIN Statements . T_END
+   23 Statements: Statements . SEMICOLON Statement
 
-    BEGIN  shift, and go to state 6
-    IF     shift, and go to state 10
-    WHILE  shift, and go to state 11
-    ID     shift, and go to state 12
-
-    Block  go to state 13
-    Stmt   go to state 45
+    T_END      shift, and go to state 54
+    SEMICOLON  shift, and go to state 55
 
 
 State 33
 
-   24 Expr: Expr DIV . Expr
+   22 Statements: Statement .
 
-    NOT       shift, and go to state 18
-    ID        shift, and go to state 19
-    NUM_INT   shift, and go to state 20
-    NUM_REAL  shift, and go to state 21
-    '('       shift, and go to state 22
-
-    Expr  go to state 46
+    $default  reduce using rule 22 (Statements)
 
 
 State 34
 
-   25 Expr: Expr MOD . Expr
+    1 Program: Header Declarations Block DOT .
 
-    NOT       shift, and go to state 18
-    ID        shift, and go to state 19
-    NUM_INT   shift, and go to state 20
-    NUM_REAL  shift, and go to state 21
-    '('       shift, and go to state 22
-
-    Expr  go to state 47
+    $default  reduce using rule 1 (Program)
 
 
 State 35
 
-   21 Expr: Expr RELOP . Expr
+   16 ProcedureDeclarations: ProcedureDeclarations ProcedureHeader Declarations . Block SEMICOLON
 
-    NOT       shift, and go to state 18
-    ID        shift, and go to state 19
-    NUM_INT   shift, and go to state 20
-    NUM_REAL  shift, and go to state 21
-    '('       shift, and go to state 22
+    T_BEGIN  shift, and go to state 18
 
-    Expr  go to state 48
+    Block  go to state 56
 
 
 State 36
 
-   22 Expr: Expr ADDOP . Expr
+   15 ProcedureDeclarations: ProcedureHeader Declarations Block . SEMICOLON
 
-    NOT       shift, and go to state 18
-    ID        shift, and go to state 19
-    NUM_INT   shift, and go to state 20
-    NUM_REAL  shift, and go to state 21
-    '('       shift, and go to state 22
-
-    Expr  go to state 49
+    SEMICOLON  shift, and go to state 57
 
 
 State 37
 
-   23 Expr: Expr MULOP . Expr
+   13 Type: T_INTEGER .
 
-    NOT       shift, and go to state 18
-    ID        shift, and go to state 19
-    NUM_INT   shift, and go to state 20
-    NUM_REAL  shift, and go to state 21
-    '('       shift, and go to state 22
-
-    Expr  go to state 50
+    $default  reduce using rule 13 (Type)
 
 
 State 38
 
-   16 Stmt: WHILE Expr DO . Stmt
+   14 Type: T_REAL .
 
-    BEGIN  shift, and go to state 6
-    IF     shift, and go to state 10
-    WHILE  shift, and go to state 11
-    ID     shift, and go to state 12
-
-    Block  go to state 13
-    Stmt   go to state 51
+    $default  reduce using rule 14 (Type)
 
 
 State 39
 
-   13 Stmt: ID ASSIGNOP Expr .
-   21 Expr: Expr . RELOP Expr
-   22     | Expr . ADDOP Expr
-   23     | Expr . MULOP Expr
-   24     | Expr . DIV Expr
-   25     | Expr . MOD Expr
+   10 VariableDeclaration: IdentifierList COLON Type . SEMICOLON
 
-    DIV    shift, and go to state 33
-    MOD    shift, and go to state 34
-    RELOP  shift, and go to state 35
-    ADDOP  shift, and go to state 36
-    MULOP  shift, and go to state 37
-
-    $default  reduce using rule 13 (Stmt)
+    SEMICOLON  shift, and go to state 58
 
 
 State 40
 
-   12 StmtList: StmtList SEMICOLON Stmt .
+   12 IdentifierList: IdentifierList COMMA ID .
 
-    $default  reduce using rule 12 (StmtList)
+    $default  reduce using rule 12 (IdentifierList)
 
 
 State 41
 
-    5 ListVar: ID COLON . Type
+   24 Statement: ID ASSIGNOP . Expression
 
-    INTEGER  shift, and go to state 52
-    REAL     shift, and go to state 53
+    ID        shift, and go to state 43
+    NUM_INT   shift, and go to state 44
+    NUM_REAL  shift, and go to state 45
+    T_NOT     shift, and go to state 46
+    ADDOP     shift, and go to state 47
+    LPAREN    shift, and go to state 48
 
-    Type  go to state 54
+    Expression        go to state 59
+    SimpleExpression  go to state 50
+    Term              go to state 51
+    Factor            go to state 52
 
 
 State 42
 
-    3 Header: PROGRAM ID SEMICOLON VAR ListVar SEMICOLON .
-    4       | PROGRAM ID SEMICOLON VAR ListVar SEMICOLON . PROCEDURE ID SEMICOLON Block SEMICOLON
+   25 Statement: ID LPAREN . RPAREN
 
-    PROCEDURE  shift, and go to state 55
-
-    $default  reduce using rule 3 (Header)
+    RPAREN  shift, and go to state 60
 
 
 State 43
 
-    6 ListVar: ListVar COMMA . ID COLON Type
+   43 Factor: ID .
 
-    ID  shift, and go to state 56
+    $default  reduce using rule 43 (Factor)
 
 
 State 44
 
-   27 Expr: '(' Expr ')' .
+   44 Factor: NUM_INT .
 
-    $default  reduce using rule 27 (Expr)
+    $default  reduce using rule 44 (Factor)
 
 
 State 45
 
-   14 Stmt: IF Expr THEN Stmt .
-   15     | IF Expr THEN Stmt . ELSE Stmt
+   45 Factor: NUM_REAL .
 
-    ELSE  shift, and go to state 57
-
-    ELSE      [reduce using rule 14 (Stmt)]
-    $default  reduce using rule 14 (Stmt)
+    $default  reduce using rule 45 (Factor)
 
 
 State 46
 
-   21 Expr: Expr . RELOP Expr
-   22     | Expr . ADDOP Expr
-   23     | Expr . MULOP Expr
-   24     | Expr . DIV Expr
-   24     | Expr DIV Expr .
-   25     | Expr . MOD Expr
+   47 Factor: T_NOT . Factor
 
-    $default  reduce using rule 24 (Expr)
+    ID        shift, and go to state 43
+    NUM_INT   shift, and go to state 44
+    NUM_REAL  shift, and go to state 45
+    T_NOT     shift, and go to state 46
+    LPAREN    shift, and go to state 48
+
+    Factor  go to state 61
 
 
 State 47
 
-   21 Expr: Expr . RELOP Expr
-   22     | Expr . ADDOP Expr
-   23     | Expr . MULOP Expr
-   24     | Expr . DIV Expr
-   25     | Expr . MOD Expr
-   25     | Expr MOD Expr .
+   35 SimpleExpression: ADDOP . Term
 
-    $default  reduce using rule 25 (Expr)
+    ID        shift, and go to state 43
+    NUM_INT   shift, and go to state 44
+    NUM_REAL  shift, and go to state 45
+    T_NOT     shift, and go to state 46
+    LPAREN    shift, and go to state 48
+
+    Term    go to state 62
+    Factor  go to state 52
 
 
 State 48
 
-   21 Expr: Expr . RELOP Expr
-   21     | Expr RELOP Expr .
-   22     | Expr . ADDOP Expr
-   23     | Expr . MULOP Expr
-   24     | Expr . DIV Expr
-   25     | Expr . MOD Expr
+   46 Factor: LPAREN . Expression RPAREN
 
-    DIV    shift, and go to state 33
-    MOD    shift, and go to state 34
-    ADDOP  shift, and go to state 36
-    MULOP  shift, and go to state 37
+    ID        shift, and go to state 43
+    NUM_INT   shift, and go to state 44
+    NUM_REAL  shift, and go to state 45
+    T_NOT     shift, and go to state 46
+    ADDOP     shift, and go to state 47
+    LPAREN    shift, and go to state 48
 
-    $default  reduce using rule 21 (Expr)
+    Expression        go to state 63
+    SimpleExpression  go to state 50
+    Term              go to state 51
+    Factor            go to state 52
 
 
 State 49
 
-   21 Expr: Expr . RELOP Expr
-   22     | Expr . ADDOP Expr
-   22     | Expr ADDOP Expr .
-   23     | Expr . MULOP Expr
-   24     | Expr . DIV Expr
-   25     | Expr . MOD Expr
+   27 Statement: T_IF Expression . T_THEN Statement ElseClause
 
-    DIV    shift, and go to state 33
-    MOD    shift, and go to state 34
-    MULOP  shift, and go to state 37
-
-    $default  reduce using rule 22 (Expr)
+    T_THEN  shift, and go to state 64
 
 
 State 50
 
-   21 Expr: Expr . RELOP Expr
-   22     | Expr . ADDOP Expr
-   23     | Expr . MULOP Expr
-   23     | Expr MULOP Expr .
-   24     | Expr . DIV Expr
-   25     | Expr . MOD Expr
+   32 Expression: SimpleExpression . RELOP SimpleExpression
+   33           | SimpleExpression .
+   36 SimpleExpression: SimpleExpression . ADDOP Term
+   37                 | SimpleExpression . T_OR Term
 
-    $default  reduce using rule 23 (Expr)
+    T_OR   shift, and go to state 65
+    RELOP  shift, and go to state 66
+    ADDOP  shift, and go to state 67
+
+    $default  reduce using rule 33 (Expression)
 
 
 State 51
 
-   16 Stmt: WHILE Expr DO Stmt .
+   34 SimpleExpression: Term .
+   38 Term: Term . MULOP Factor
+   39     | Term . T_DIV Factor
+   40     | Term . T_MOD Factor
+   41     | Term . T_AND Factor
 
-    $default  reduce using rule 16 (Stmt)
+    T_AND  shift, and go to state 68
+    T_DIV  shift, and go to state 69
+    T_MOD  shift, and go to state 70
+    MULOP  shift, and go to state 71
+
+    $default  reduce using rule 34 (SimpleExpression)
 
 
 State 52
 
-    7 Type: INTEGER .
+   42 Term: Factor .
 
-    $default  reduce using rule 7 (Type)
+    $default  reduce using rule 42 (Term)
 
 
 State 53
 
-    8 Type: REAL .
+   28 Statement: T_WHILE Expression . T_DO Statement
 
-    $default  reduce using rule 8 (Type)
+    T_DO  shift, and go to state 72
 
 
 State 54
 
-    5 ListVar: ID COLON Type .
+   21 Block: T_BEGIN Statements T_END .
 
-    $default  reduce using rule 5 (ListVar)
+    $default  reduce using rule 21 (Block)
 
 
 State 55
 
-    4 Header: PROGRAM ID SEMICOLON VAR ListVar SEMICOLON PROCEDURE . ID SEMICOLON Block SEMICOLON
+   23 Statements: Statements SEMICOLON . Statement
 
-    ID  shift, and go to state 58
+    ID       shift, and go to state 27
+    T_BEGIN  shift, and go to state 18
+    T_IF     shift, and go to state 29
+    T_WHILE  shift, and go to state 30
+
+    $default  reduce using rule 29 (Statement)
+
+    Block      go to state 31
+    Statement  go to state 73
 
 
 State 56
 
-    6 ListVar: ListVar COMMA ID . COLON Type
+   16 ProcedureDeclarations: ProcedureDeclarations ProcedureHeader Declarations Block . SEMICOLON
 
-    COLON  shift, and go to state 59
+    SEMICOLON  shift, and go to state 74
 
 
 State 57
 
-   15 Stmt: IF Expr THEN Stmt ELSE . Stmt
+   15 ProcedureDeclarations: ProcedureHeader Declarations Block SEMICOLON .
 
-    BEGIN  shift, and go to state 6
-    IF     shift, and go to state 10
-    WHILE  shift, and go to state 11
-    ID     shift, and go to state 12
-
-    Block  go to state 13
-    Stmt   go to state 60
+    $default  reduce using rule 15 (ProcedureDeclarations)
 
 
 State 58
 
-    4 Header: PROGRAM ID SEMICOLON VAR ListVar SEMICOLON PROCEDURE ID . SEMICOLON Block SEMICOLON
+   10 VariableDeclaration: IdentifierList COLON Type SEMICOLON .
 
-    SEMICOLON  shift, and go to state 61
+    $default  reduce using rule 10 (VariableDeclaration)
 
 
 State 59
 
-    6 ListVar: ListVar COMMA ID COLON . Type
+   24 Statement: ID ASSIGNOP Expression .
 
-    INTEGER  shift, and go to state 52
-    REAL     shift, and go to state 53
-
-    Type  go to state 62
+    $default  reduce using rule 24 (Statement)
 
 
 State 60
 
-   15 Stmt: IF Expr THEN Stmt ELSE Stmt .
+   25 Statement: ID LPAREN RPAREN .
 
-    $default  reduce using rule 15 (Stmt)
+    $default  reduce using rule 25 (Statement)
 
 
 State 61
 
-    4 Header: PROGRAM ID SEMICOLON VAR ListVar SEMICOLON PROCEDURE ID SEMICOLON . Block SEMICOLON
+   47 Factor: T_NOT Factor .
 
-    BEGIN  shift, and go to state 6
-
-    Block  go to state 63
+    $default  reduce using rule 47 (Factor)
 
 
 State 62
 
-    6 ListVar: ListVar COMMA ID COLON Type .
+   35 SimpleExpression: ADDOP Term .
+   38 Term: Term . MULOP Factor
+   39     | Term . T_DIV Factor
+   40     | Term . T_MOD Factor
+   41     | Term . T_AND Factor
 
-    $default  reduce using rule 6 (ListVar)
+    T_AND  shift, and go to state 68
+    T_DIV  shift, and go to state 69
+    T_MOD  shift, and go to state 70
+    MULOP  shift, and go to state 71
+
+    $default  reduce using rule 35 (SimpleExpression)
 
 
 State 63
 
-    4 Header: PROGRAM ID SEMICOLON VAR ListVar SEMICOLON PROCEDURE ID SEMICOLON Block . SEMICOLON
+   46 Factor: LPAREN Expression . RPAREN
 
-    SEMICOLON  shift, and go to state 64
+    RPAREN  shift, and go to state 75
 
 
 State 64
 
-    4 Header: PROGRAM ID SEMICOLON VAR ListVar SEMICOLON PROCEDURE ID SEMICOLON Block SEMICOLON .
+   27 Statement: T_IF Expression T_THEN . Statement ElseClause
 
-    $default  reduce using rule 4 (Header)
+    ID       shift, and go to state 27
+    T_BEGIN  shift, and go to state 18
+    T_IF     shift, and go to state 29
+    T_WHILE  shift, and go to state 30
+
+    $default  reduce using rule 29 (Statement)
+
+    Block      go to state 31
+    Statement  go to state 76
+
+
+State 65
+
+   37 SimpleExpression: SimpleExpression T_OR . Term
+
+    ID        shift, and go to state 43
+    NUM_INT   shift, and go to state 44
+    NUM_REAL  shift, and go to state 45
+    T_NOT     shift, and go to state 46
+    LPAREN    shift, and go to state 48
+
+    Term    go to state 77
+    Factor  go to state 52
+
+
+State 66
+
+   32 Expression: SimpleExpression RELOP . SimpleExpression
+
+    ID        shift, and go to state 43
+    NUM_INT   shift, and go to state 44
+    NUM_REAL  shift, and go to state 45
+    T_NOT     shift, and go to state 46
+    ADDOP     shift, and go to state 47
+    LPAREN    shift, and go to state 48
+
+    SimpleExpression  go to state 78
+    Term              go to state 51
+    Factor            go to state 52
+
+
+State 67
+
+   36 SimpleExpression: SimpleExpression ADDOP . Term
+
+    ID        shift, and go to state 43
+    NUM_INT   shift, and go to state 44
+    NUM_REAL  shift, and go to state 45
+    T_NOT     shift, and go to state 46
+    LPAREN    shift, and go to state 48
+
+    Term    go to state 79
+    Factor  go to state 52
+
+
+State 68
+
+   41 Term: Term T_AND . Factor
+
+    ID        shift, and go to state 43
+    NUM_INT   shift, and go to state 44
+    NUM_REAL  shift, and go to state 45
+    T_NOT     shift, and go to state 46
+    LPAREN    shift, and go to state 48
+
+    Factor  go to state 80
+
+
+State 69
+
+   39 Term: Term T_DIV . Factor
+
+    ID        shift, and go to state 43
+    NUM_INT   shift, and go to state 44
+    NUM_REAL  shift, and go to state 45
+    T_NOT     shift, and go to state 46
+    LPAREN    shift, and go to state 48
+
+    Factor  go to state 81
+
+
+State 70
+
+   40 Term: Term T_MOD . Factor
+
+    ID        shift, and go to state 43
+    NUM_INT   shift, and go to state 44
+    NUM_REAL  shift, and go to state 45
+    T_NOT     shift, and go to state 46
+    LPAREN    shift, and go to state 48
+
+    Factor  go to state 82
+
+
+State 71
+
+   38 Term: Term MULOP . Factor
+
+    ID        shift, and go to state 43
+    NUM_INT   shift, and go to state 44
+    NUM_REAL  shift, and go to state 45
+    T_NOT     shift, and go to state 46
+    LPAREN    shift, and go to state 48
+
+    Factor  go to state 83
+
+
+State 72
+
+   28 Statement: T_WHILE Expression T_DO . Statement
+
+    ID       shift, and go to state 27
+    T_BEGIN  shift, and go to state 18
+    T_IF     shift, and go to state 29
+    T_WHILE  shift, and go to state 30
+
+    $default  reduce using rule 29 (Statement)
+
+    Block      go to state 31
+    Statement  go to state 84
+
+
+State 73
+
+   23 Statements: Statements SEMICOLON Statement .
+
+    $default  reduce using rule 23 (Statements)
+
+
+State 74
+
+   16 ProcedureDeclarations: ProcedureDeclarations ProcedureHeader Declarations Block SEMICOLON .
+
+    $default  reduce using rule 16 (ProcedureDeclarations)
+
+
+State 75
+
+   46 Factor: LPAREN Expression RPAREN .
+
+    $default  reduce using rule 46 (Factor)
+
+
+State 76
+
+   27 Statement: T_IF Expression T_THEN Statement . ElseClause
+
+    T_ELSE  shift, and go to state 85
+
+    T_ELSE    [reduce using rule 31 (ElseClause)]
+    $default  reduce using rule 31 (ElseClause)
+
+    ElseClause  go to state 86
+
+
+State 77
+
+   37 SimpleExpression: SimpleExpression T_OR Term .
+   38 Term: Term . MULOP Factor
+   39     | Term . T_DIV Factor
+   40     | Term . T_MOD Factor
+   41     | Term . T_AND Factor
+
+    T_AND  shift, and go to state 68
+    T_DIV  shift, and go to state 69
+    T_MOD  shift, and go to state 70
+    MULOP  shift, and go to state 71
+
+    $default  reduce using rule 37 (SimpleExpression)
+
+
+State 78
+
+   32 Expression: SimpleExpression RELOP SimpleExpression .
+   36 SimpleExpression: SimpleExpression . ADDOP Term
+   37                 | SimpleExpression . T_OR Term
+
+    T_OR   shift, and go to state 65
+    ADDOP  shift, and go to state 67
+
+    $default  reduce using rule 32 (Expression)
+
+
+State 79
+
+   36 SimpleExpression: SimpleExpression ADDOP Term .
+   38 Term: Term . MULOP Factor
+   39     | Term . T_DIV Factor
+   40     | Term . T_MOD Factor
+   41     | Term . T_AND Factor
+
+    T_AND  shift, and go to state 68
+    T_DIV  shift, and go to state 69
+    T_MOD  shift, and go to state 70
+    MULOP  shift, and go to state 71
+
+    $default  reduce using rule 36 (SimpleExpression)
+
+
+State 80
+
+   41 Term: Term T_AND Factor .
+
+    $default  reduce using rule 41 (Term)
+
+
+State 81
+
+   39 Term: Term T_DIV Factor .
+
+    $default  reduce using rule 39 (Term)
+
+
+State 82
+
+   40 Term: Term T_MOD Factor .
+
+    $default  reduce using rule 40 (Term)
+
+
+State 83
+
+   38 Term: Term MULOP Factor .
+
+    $default  reduce using rule 38 (Term)
+
+
+State 84
+
+   28 Statement: T_WHILE Expression T_DO Statement .
+
+    $default  reduce using rule 28 (Statement)
+
+
+State 85
+
+   30 ElseClause: T_ELSE . Statement
+
+    ID       shift, and go to state 27
+    T_BEGIN  shift, and go to state 18
+    T_IF     shift, and go to state 29
+    T_WHILE  shift, and go to state 30
+
+    $default  reduce using rule 29 (Statement)
+
+    Block      go to state 31
+    Statement  go to state 87
+
+
+State 86
+
+   27 Statement: T_IF Expression T_THEN Statement ElseClause .
+
+    $default  reduce using rule 27 (Statement)
+
+
+State 87
+
+   30 ElseClause: T_ELSE Statement .
+
+    $default  reduce using rule 30 (ElseClause)

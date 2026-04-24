@@ -1,104 +1,139 @@
 # Compilador Pascal - Projeto 1 VA
 ## Professor: Waldemar Pires Ferreira Neto
 
-## Conceitos Básicos do Projeto
+## O que este Projeto faz?
 
-### 1. Analisador Léxico (Flex)
-O **Flex** é uma ferramenta que transforma o código-fonte em tokens. Pense nele como um separador de palavras.
+Este projeto é um **compilador** para um subconjunto da linguagem Pascal. Ele:
 
-**O que ele faz:**
-- Encontra palavras reservadas (program, var, begin, etc.)
-- Encontra identificadores (nomes de variáveis)
-- Encontra números (1, 2, 3.14)
-- Encontra operadores (:=, +, -, *, /)
-- Encontra delimitadores (;, :, .)
+1. **Lê código Pascal** (como `program exemplo;`)
+2. **Verifica se está correto** (análise léxica + sintática)
+3. **Guarda os nomes das variáveis** (tabela de símbolos)
 
-**Exemplo:**
-```
-Entrada:  program exemplo;
-Saída:    PROGRAM ID(exemplo) SEMICOLON
-```
+É como um "tradutor" que verifica se o código está certo e anota quais variáveis existem.
 
-### 2. Analisador Sintático (Bison)
-O **Bison** verifica se os tokens estão em ordem certa. É como verificar se a frase faz sentido grammaticalmente.
+---
 
-**O que ele faz:**
-- Verifica se "program" vem antes do nome
-- Verifica se "begin" e "end" estão balanceados
-- Verifica se comandos estão com ponto e vírgula
-- Cria a tabela de símbolos
+## Arquivos do Projeto
 
-**Exemplo válido:**
-```
-program exemplo;
-begin
-end.
-```
+### 1. lex.l (Analisador Léxico - Flex)
+**O que faz:** Separa o código em "palavras" (tokens).
 
-**Exemplo inválido:**
-```
-begin exemplo;  <-- ERRADO! Falta "program"
-end.
-```
+**Entra:** `program exemplo;`
+** Sai:** `PROGRAM ID(exemplo) SEMICOLON`
 
-### 3. Fluxo do Compilador
-```
-Código Pascal → [Flex] → Tokens → [Bison] → Programa válido
-                                    ↓
-                           Tabela de Símbolos
-```
+### 2. parser.y (Analisador Sintático - Bison)  
+**O que faz:** Verifica se os tokens estão em ordem certa.
 
-### 4. Tabela de Símbolos
-Guarda informações sobre todas as variáveis e procedures declaradas:
-- Nome (exemplo, x, y, z)
-- Tipo (integer, real, procedure)
-- Categoria (variable, procedure)
-- Linha onde foi declarada
+**Exemplo certo:** `program exemplo; begin end.`
+**Exemplo errado:** `begin exemplo;` (falta "program")
 
-### 5. Conflitos
-O Bison às vezes não sabe se faz "shift" (lê mais tokens) ou "reduce" (aplica uma regra). Isso cria conflitos:
-- **Shift/Reduce:** 2 conflitos (aceitável)
-- **Reduce/Reduce:** 4 conflitos
+### 3. symbol_table.c / symbol_table.h
+**O que faz:** Guarda lista de todas variáveis e procedures declaradas.
 
-Isso acontece porque a gramática do Pascal tem ambiguidades naturais.
+**Armazena:** nome, tipo (integer/real), categoria (variable/procedure)
 
-## Componentes do Projeto
+### 4. type_checker.c / type_checker.h
+**O que faz:** Verifica tipos compatíveis (ex: integer + real).
 
-- **lex.l** - Analisador Léxico (Flex)
-- **parser.y** - Analisador Sintático (Bison)
-- **symbol_table.c/h** - Tabela de Símbolos
-- **type_checker.c/h** - Verificador de Tipos
-- **code_gen.c/h** - Gerador de Código
+### 5. code_gen.c / code_gen.h
+**O que faz:** Gera código intermediário (estrutura).
 
-## Compilação
+### 6. Makefile
+**O que faz:** Compila tudo automaticamente.
 
+---
+
+## Como Compilar
+
+### Método 1: Passo a passo
 ```bash
-# Gerar lexer e parser
-flex lex.l
-bison -d -v parser.y
-
-# Compilar módulos
+flex lex.l              # Gera lex.yy.c
+bison -d -v parser.y    # Gera parser.tab.c e parser.tab.h
 gcc -c lex.yy.c -I. -include symbol_table.h -o lexer.o
 gcc -c parser.tab.c -I. -o parser.o
 gcc -c symbol_table.c -I. -o symbol_table.o
 gcc -c type_checker.c -I. -o type_checker.o
 gcc -c code_gen.c -I. -o code_gen.o
-
-# Linkar
 gcc lexer.o parser.o symbol_table.o type_checker.o code_gen.o -o compilador.exe
 ```
 
-## Uso
-
+### Método 2: Makefile
 ```bash
-.\compilador.exe entrada.pas
+make all
+make run
 ```
 
-## Resultado
+---
+
+## Conceitos Básicos
+
+### Flex (Analisador Léxico)
+- Transforma código em tokens
+- Exemplo: "x := 1" → "ID(x) ASSIGNOP NUM(1)"
+
+### Bison (Analisador Sintático)  
+- Verifica se tokens seguem gramática certa
+- Exemplo válido: `program x; begin end.`
+
+### Tabela de Símbolos
+- Guarda informações sobre variáveis
+- Exemplo: "x" → tipo: integer, categoria: variable
+
+---
+
+## Gramática Suportada
+
+```
+Program      → Header Declarations Block .
+Header       → program id ;
+Declarations → VariableSection ProcedureDecl | ε
+Block        → begin Statements end
+Statement    → id := Expression | id() | if...then | while...do | begin...end
+```
+
+---
+
+## Exemplo de Entrada
+
+```pascal
+program exemplo;
+
+var
+x, y : integer;
+z : real;
+
+procedure teste;
+var
+a : integer;
+begin
+a := 10;
+if a > 5 then
+x := a
+else
+x := 0
+end;
+
+begin
+x := 1;
+y := 2;
+z := 3.5;
+
+teste();
+
+while x < y do
+begin
+x := x + 1
+end
+end.
+```
+
+## Saída
 
 ```
 === Compilador Pascal ===
+
 === OK ===
+
 === Tabela de Símbolos ===
   Nome                 Tipo       Categoria 
   exemplo              procedure  procedure  linha: 1
@@ -112,9 +147,9 @@ Total: 6 símbolos
 
 ## Status
 
-- ✅ Analisador Léxico completo
-- ✅ Analisador Sintático completo
+- ✅ Analisador Léxico (Flex)
+- ✅ Analisador Sintático (Bison)
 - ✅ Tabela de Símbolos
 - ✅ Verificador de Tipos
 - ✅ Gerador de Código
-- ⚠️ Conflitos (aceitável)
+- ⚠️ 2 shift/reduce conflicts (normal)

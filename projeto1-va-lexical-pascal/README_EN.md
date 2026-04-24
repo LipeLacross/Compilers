@@ -1,126 +1,99 @@
 # Pascal Compiler - Project 1 VA
 ## Professor: Waldemar Pires Ferreira Neto
 
-## What is Flex and Bison?
+## What does this Project do?
 
-### Flex (Lexical Analyzer)
-Flex splits source code into **tokens**. It's like separating words in a sentence.
+This project is a **compiler** for a subset of Pascal language. It:
 
-Example:
-```
-"program exemplo;" 
-↓
-PROGRAM ID(exemplo) SEMICOLON
-```
+1. **Reads Pascal code** (like `program exemplo;`)
+2. **Checks if it's correct** (lexical + syntax analysis)
+3. **Stores variable names** (symbol table)
 
-Rules in lex.l:
-- Reserved words (program, var, begin, etc.)
-- Identifiers: `[a-zA-Z][a-zA-Z0-9]*`
-- Numbers: `[0-9]+`
-- Operators: `:=`, `>=`, `<=`, etc.
+It's like a "translator" that checks if code is right and notes which variables exist.
 
-### Bison (Syntax Analyzer)
-Bison checks if tokens follow the **correct grammar**. It's like checking if the sentence makes sense.
+---
 
-Valid example:
-```
-PROGRAM ID ; BEGIN END .
-```
+## Project Files
 
-Invalid example:
-```
-BEGIN ID ; END .  (missing "program")
-```
+### 1. lex.l (Lexical Analyzer - Flex)
+**What it does:** Splits code into "words" (tokens).
 
-Rules in parser.y:
-- `Program → Header Declarations Block DOT`
-- `Block → BEGIN Statements END`
-- `Statement → ID := Expression`
+**Input:** `program exemplo;`
+**Output:** `PROGRAM ID(exemplo) SEMICOLON`
 
-### Integration
-```
-Code → [Flex] → Tokens → [Bison] → Valid program
-                            ↓
-                   Symbol Table
-```
+### 2. parser.y (Syntax Analyzer - Bison)
+**What it does:** Checks if tokens are in correct order.
 
-## Components
+**Valid:** `program exemplo; begin end.`
+**Invalid:** `begin exemplo;` (missing "program")
 
-- **lex.l** - Lexical Analyzer (Flex)
-- **parser.y** - Syntax Analyzer (Bison)
-- **symbol_table.c/h** - Symbol Table
-- **type_checker.c/h** - Type Checker
-- **code_gen.c/h** - Code Generator
+### 3. symbol_table.c / symbol_table.h
+**What it does:** Stores all declared variables and procedures.
 
-## Build
+**Stores:** name, type (integer/real), category (variable/procedure)
 
+### 4. type_checker.c / type_checker.h
+**What it does:** Checks compatible types (ex: integer + real).
+
+### 5. code_gen.c / code_gen.h
+**What it does:** Generates intermediate code (structure).
+
+### 6. Makefile
+**What it does:** Compiles everything automatically.
+
+---
+
+## How to Build
+
+### Method 1: Step by step
 ```bash
-# Clean previous files
-Remove-Item -Force *.o, compilador.exe, lex.yy.c, parser.tab.c, parser.tab.h -ErrorAction SilentlyContinue
-
-# Generate lexer and parser
-flex lex.l
-bison -d -v parser.y
-
-# Compile modules
+flex lex.l              # Generates lex.yy.c
+bison -d -v parser.y    # Generates parser.tab.c and parser.tab.h
 gcc -c lex.yy.c -I. -include symbol_table.h -o lexer.o
 gcc -c parser.tab.c -I. -o parser.o
 gcc -c symbol_table.c -I. -o symbol_table.o
 gcc -c type_checker.c -I. -o type_checker.o
 gcc -c code_gen.c -I. -o code_gen.o
-
-# Link
 gcc lexer.o parser.o symbol_table.o type_checker.o code_gen.o -o compilador.exe
 ```
 
-Or use Makefile:
+### Method 2: Makefile
 ```bash
 make all
-```
-
-## Usage
-
-```bash
-# Compile Pascal file
-.\compilador.exe entrada.pas
-
-# or via Makefile
 make run
 ```
+
+---
+
+## Basic Concepts
+
+### Flex (Lexical Analyzer)
+- Transforms code into tokens
+- Example: "x := 1" → "ID(x) ASSIGNOP NUM(1)"
+
+### Bison (Syntax Analyzer)
+- Checks if tokens follow correct grammar
+- Valid example: `program x; begin end.`
+
+### Symbol Table
+- Stores information about variables
+- Example: "x" → type: integer, category: variable
+
+---
 
 ## Supported Grammar
 
 ```
-Program -> Header Declarations Block .
-Header -> program id ;
-Declarations -> VariableDeclarationSection ProcedureDeclarations | ε
-VariableDeclarationSection -> VAR VariableDeclarations | ε
-VariableDeclarations -> VariableDeclarations VariableDeclaration | VariableDeclaration
-VariableDeclaration -> IdentifierList : Type ;
-IdentifierList -> IdentifierList , id | id
-Type -> integer | real
-ProcedureDeclarations -> ProcedureHeader Declarations Block ; | ProcedureDeclarations ProcedureHeader Declarations Block ;
-ProcedureHeader -> procedure id ;
-Block -> begin Statements end | begin end
-Statements -> Statements ; Statement | Statement
-Statement -> id := Expression | id () | Block | if Expression then Statement ElseClause | while Expression do Statement | ε
-ElseClause -> else Statement | ε
-Expression -> SimpleExpression relop SimpleExpression | SimpleExpression
-SimpleExpression -> Term | addop Term | SimpleExpression addop Term
-Term -> Term mulop Factor | Factor
-Factor -> id | num | ( Expression ) | not Factor
+Program      → Header Declarations Block .
+Header       → program id ;
+Declarations → VariableSection ProcedureDecl | ε
+Block        → begin Statements end
+Statement    → id := Expression | id() | if...then | while...do | begin...end
 ```
 
-## Tokens
+---
 
-- **Reserved:** program, var, integer, real, procedure, begin, end, if, then, else, while, do, or, and, not, div, mod
-- **Identifier:** [a-zA-Z]([a-zA-Z0-9])*
-- **Integer:** [0-9]+
-- **Real:** [0-9]+\.[0-9]+
-- **Operators:** + - * / := >= <= <> > < =
-- **Delimiters:** . : ; , ( )
-
-## Example
+## Input Example
 
 ```pascal
 program exemplo;
@@ -154,7 +127,7 @@ end
 end.
 ```
 
-## Result
+## Output
 
 ```
 === Compilador Pascal ===
@@ -174,10 +147,9 @@ Total: 6 símbolos
 
 ## Status
 
-- ✅ Lexical Analyzer complete
-- ✅ Syntax Analyzer complete (exact grammar)
+- ✅ Lexical Analyzer (Flex)
+- ✅ Syntax Analyzer (Bison)
 - ✅ Symbol Table
 - ✅ Type Checker
-- ✅ Code Generator (structure)
-- ⚠️ 2 shift/reduce conflicts (acceptable)
-- ⚠️ 4 reduce/reduce conflicts
+- ✅ Code Generator
+- ⚠️ 2 shift/reduce conflicts (normal)

@@ -1,0 +1,9 @@
+program testeerro;
+var
+  x : integer;
+  y : real;
+begin
+  x := 10;
+  y := 3.14;
+  x := y
+end.

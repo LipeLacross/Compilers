@@ -6,7 +6,7 @@
 #include <string.h>
 #include "parser.tab.h"
 
-int num_line = 1;
+extern int current_line;
 
 int is_reserved(const char *text) {
     const char *r[] = {"program","var","integer","real","procedure","begin","end",
@@ -31,7 +31,7 @@ digits  {digit}+
  /* Comentários { } */
 <INITIAL>\{  BEGIN(CMT);
 <CMT>\}  BEGIN(INITIAL);
-<CMT>\n  num_line++;
+<CMT>\n  current_line++;
 <CMT>[^\n}]+  ;
 
  /* Palavras reservadas */
@@ -100,12 +100,12 @@ mod        { return T_MOD; }
 ")"     { return RPAREN; }
 
  /* Quebra de linha */
-\n  { num_line++; }
+\n  { current_line++; }
 
  /* Espaços */
 [ \t\r]+  { }
 
  /* Erro */
-.  { fprintf(stderr, "Erro léxico: '%c' na linha %d\n", yytext[0], num_line); }
+.  { fprintf(stderr, "Erro léxico: '%c' na linha %d\n", yytext[0], current_line); }
 
 %%

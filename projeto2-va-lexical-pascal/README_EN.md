@@ -1,4 +1,4 @@
-# Pascal Compiler - Project 1 VA
+# Pascal Compiler - Project 2 VA (Semantic Analysis)
 ## Professor: Waldemar Pires Ferreira Neto
 
 ## What does this Project do?
@@ -6,40 +6,44 @@
 This project is a **compiler** for a subset of Pascal language. It:
 
 1. **Reads Pascal code** (like `program exemplo;`)
-2. **Checks if it's correct** (lexical + syntax analysis)
-3. **Stores variable names** (symbol table)
+2. **Checks if it's correct** (lexical + syntax + **semantic** analysis)
+3. **Stores declared names** (symbol table)
+4. **Validates types** in expressions and assignments
 
-It's like a "translator" that checks if code is right and notes which variables exist.
+The main addition in this project is **Semantic Analysis**: the compiler now checks if types are compatible (e.g., rejects `integer := real`).
 
 ---
 
 ## Project Files
 
 ### 1. lex.l (Lexical Analyzer - Flex)
-**What it does:** Splits code into "words" (tokens).
+**What it does:** Splits code into tokens.
 
 **Input:** `program exemplo;`
 **Output:** `PROGRAM ID(exemplo) SEMICOLON`
 
 ### 2. parser.y (Syntax Analyzer - Bison)
-**What it does:** Checks if tokens are in correct order.
+**What it does:** Checks token order and performs semantic analysis.
 
-**Valid:** `program exemplo; begin end.`
-**Invalid:** `begin exemplo;` (missing "program")
+**New:** Type propagation (`SymbolType`) through Expressions, Terms, and Factors.
 
 ### 3. symbol_table.c / symbol_table.h
 **What it does:** Stores all declared variables and procedures.
 
-**Stores:** name, type (integer/real), category (variable/procedure)
+**Stores:** name, type (integer/real/boolean), category (variable/procedure)
 
 ### 4. type_checker.c / type_checker.h
-**What it does:** Checks compatible types (ex: integer + real).
+**What it does:** Checks type compatibility in:
+- **Assignments:** `x := y` — validates if `y` type is compatible with `x`
+- **Arithmetic expressions:** rejects `true + 1`
+- **Comparisons:** rejects `1 > true`
+- **Boolean conditions:** If/While require boolean condition
 
 ### 5. code_gen.c / code_gen.h
-**What it does:** Generates intermediate code (structure).
+**What it does:** Generates intermediate code (TAC structure).
 
 ### 6. Makefile
-**What it does:** Compiles everything automatically.
+**What it does:** Automates compilation (optional — use manual commands if make is not available).
 
 ---
 
@@ -54,30 +58,24 @@ gcc -c parser.tab.c -I. -o parser.o
 gcc -c symbol_table.c -I. -o symbol_table.o
 gcc -c type_checker.c -I. -o type_checker.o
 gcc -c code_gen.c -I. -o code_gen.o
-gcc lexer.o parser.o symbol_table.o type_checker.o code_gen.o -o compilador.exe
+gcc *.o -o compilador.exe
+.\compilador.exe entrada.pas
 ```
 
-### Method 2: Makefile
-```bash
-make all
-make run
-```
+
 
 ---
 
-## Basic Concepts
+## Semantic Checks Implemented
 
-### Flex (Lexical Analyzer)
-- Transforms code into tokens
-- Example: "x := 1" → "ID(x) ASSIGNOP NUM(1)"
-
-### Bison (Syntax Analyzer)
-- Checks if tokens follow correct grammar
-- Valid example: `program x; begin end.`
-
-### Symbol Table
-- Stores information about variables
-- Example: "x" → type: integer, category: variable
+| # | Check | Error Example |
+|---|---|---|
+| 1 | Incompatible type in assignment | `x : integer; y : real; ... x := y` |
+| 2 | Non-boolean if condition | `if 1 then ...` |
+| 3 | Non-boolean while condition | `while 1 do ...` |
+| 4 | Arithmetic operation with boolean | `true + 1` |
+| 5 | Incompatible types in comparison | `1 > true` |
+| 6 | Undeclared variable | `x := 1` without `var x` |
 
 ---
 
@@ -127,22 +125,33 @@ end
 end.
 ```
 
-## Output
+## Output (no errors)
 
 ```
 === Compilador Pascal ===
-
-=== OK ===
+Verificação de tipos: OK
 
 === Tabela de Símbolos ===
   Nome                 Tipo       Categoria 
   exemplo              procedure  procedure  linha: 1
-  x                    integer    variable   linha: 1
-  y                    integer    variable   linha: 1
-  z                    real       variable   linha: 1
-  teste                procedure  procedure  linha: 1
-  a                    integer    variable   linha: 1
+  x                    integer    variable   linha: 4
+  y                    integer    variable   linha: 4
+  z                    real       variable   linha: 5
+  teste                procedure  procedure  linha: 7
+  a                    integer    variable   linha: 9
 Total: 6 símbolos
+```
+
+## Output (with semantic error)
+
+```
+=== Compilador Pascal ===
+
+=== Erros de Tipo (1) ===
+  Linha 9: Tipos incompatíveis na atribuição
+
+=== Tabela de Símbolos ===
+  ...
 ```
 
 ## Status
@@ -151,5 +160,6 @@ Total: 6 símbolos
 - ✅ Syntax Analyzer (Bison)
 - ✅ Symbol Table
 - ✅ Type Checker
+- ✅ **Semantic Analysis** (type checks in assignments, expressions, if/while)
 - ✅ Code Generator
 - ⚠️ 2 shift/reduce conflicts (normal)

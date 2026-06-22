@@ -47,7 +47,7 @@ Um arquivo `.l` contém três seções separadas por `%%`:
 #include <stdio.h>
 #include "y.tab.h"
 
-int num_lines = 1;
+extern int current_line;
 %}
 
 /* Definições de macros */
@@ -103,7 +103,7 @@ Para comentários delimitados por `{` e `}`:
 <COMMENT>{
 \}              BEGIN(INITIAL);
 [^\n}]+         ; /* Ignora */
-\n              num_lines++;
+\n              current_line++;
 }
 ```
 
@@ -266,7 +266,12 @@ typedef enum {
     OP_SUB,     // -
     OP_MUL,     // *
     OP_DIV,     // /
-    OP_RELOP,   // <, >, =, etc.
+    OP_LT,      // <
+    OP_GT,      // >
+    OP_LE,      // <=
+    OP_GE,      // >=
+    OP_EQ,      // =
+    OP_NE,      // <>
     OP_JUMP,    // goto
     OP_JUMP_IF, // if ... goto
     OP_CALL,    // call proc
@@ -304,21 +309,24 @@ make clean
 ### Compilação Manual
 
 ```bash
-# 1. Gerar lexer
-flex -o lex.yy.c lex.l
+# 1. Gerar parser (Bison)
+bison -d -v parser.y
 
-# 2. Gerar parser
-bison -d -v -o parser.tab.c parser.y
+# 2. Gerar lexer (Flex)
+flex lex.l
 
-# 3. Compilar
-gcc -c lex.yy.c -o lexer.o
-gcc -c parser.tab.c -o parser.o
-gcc -c symbol_table.c -o symbol_table.o
-gcc -c type_checker.c -o type_checker.o
-gcc -c code_gen.c -o code_gen.o
+# 3. Compilar cada módulo
+gcc -c lex.yy.c -I. -include symbol_table.h -o lexer.o
+gcc -c parser.tab.c -I. -o parser.o
+gcc -c symbol_table.c -I. -o symbol_table.o
+gcc -c type_checker.c -I. -o type_checker.o
+gcc -c code_gen.c -I. -o code_gen.o
 
-# 4. Linking
-gcc lexer.o parser.tab.o symbol_table.o type_checker.o code_gen.o -lfl -o compilador
+# 4. Linkar
+gcc *.o -o compilador.exe
+
+# 5. Executar
+.\compilador.exe entrada.pas
 ```
 
 ---

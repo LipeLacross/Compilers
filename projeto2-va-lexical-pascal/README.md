@@ -43,7 +43,7 @@ A grande novidade deste projeto é a **Análise Semântica**: o compilador agora
 **O que faz:** Gera código intermediário (estrutura).
 
 ### 6. Makefile
-**O que faz:** Compila tudo automaticamente.
+**O que faz:** Compila tudo automaticamente (opcional — usar comandos manuais se nao tiver make).
 
 ---
 
@@ -62,11 +62,7 @@ gcc *.o -o compilador.exe
 .\compilador.exe entrada.pas
 ```
 
-### Método 2: Makefile
-```bash
-make all
-make run
-```
+
 
 ---
 
